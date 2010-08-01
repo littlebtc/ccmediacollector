@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE page>
+
+<page xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <script type="application/x-javascript" src="chrome://ccmediacollector/content/collection/collection.js" />
+  <!--<stringbundleset id="stringbundleset">
+    <stringbundle id="nicomonkey-strings" src="chrome://ccmediacollector/locale/collection.properties"/>
+  </stringbundleset>-->
+  <label value="It works!" />
+</page>
