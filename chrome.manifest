@@ -2,7 +2,7 @@ content	ccmediacollector		content/
 locale	ccmediacollector		en-US	locale/en-US/
 skin	ccmediacollector		classic/1.0	skin/
 resource ccmediacollector modules/
-overlay	chrome://browser/content/browser.xul	chrome://ccmediacollector/content/fxOverlay.xul
+overlay	chrome://browser/content/browser.xul	chrome://ccmediacollector/content/browserOverlay.xul
 
 component {4a4005aa-0ff7-4acc-a0d5-5263c3d0320a} components/aboutCollection.js
 contract @mozilla.org/network/protocol/about;1?what=collection {4a4005aa-0ff7-4acc-a0d5-5263c3d0320a}
