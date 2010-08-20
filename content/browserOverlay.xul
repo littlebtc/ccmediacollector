@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet href="chrome://ccmediacollector/skin/browserOverlay.css" type="text/css"?>
-<!DOCTYPE overlay SYSTEM "chrome://nicofox/locale/nicofox.dtd">
+<!DOCTYPE overlay SYSTEM "chrome://ccmediacollector/locale/browserOverlay.dtd">
 <overlay id="ccmediacollector-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   <script type="application/x-javascript" src="chrome://ccmediacollector/content/browserOverlay.js"/>  
+  <hbox id="urlbar-icons">
+    <image id="ccmc-add-button" class="urlbar-icon" 
+           src="chrome://ccmediacollector/skin/note_add.png" tooltiptext="&addButton.tooltip;" 
+           insertbefore="feed-button"/>
+  </hbox>
 </overlay>
