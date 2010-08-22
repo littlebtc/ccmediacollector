@@ -39,6 +39,8 @@ ccMediaCollector.listener = {
     } else {
       document.getElementById("ccmc-add-button").hidden = true;
     }
+    document.getElementById("ccmc-info").hidePopup();
+    ccMediaCollector.cleanPanelInfo();
   },
 
   // For definitions of the remaining functions see related documentation
@@ -67,6 +69,37 @@ ccMediaCollector.onPageLoad = function(aEvent) {
   }
 };
 
+/* Open the panel if needed */
+ccMediaCollector.openPanel = function(anchor) {
+  if(gBrowser.selectedBrowser.ccmc) {
+    document.getElementById("ccmc-info").openPopup(anchor, 'before_end', 0, 0, false, false);;
+  }
+};
+/* When popup is showing, fill info into panel */
+ccMediaCollector.fillPanelInfo = function(anchor) {
+  if(gBrowser.selectedBrowser.ccmc) {
+    var info = gBrowser.selectedBrowser.ccmc;
+    document.getElementById("ccmc-info-title").value = info.title;
+    document.getElementById("ccmc-info-author").value = info.author;
+    /* Fetch the CC license elements, and display the right icon. XXX: non-cc license? */
+    if (info.license) {
+      var licensePart = info.license.match(/\/(by[a-z\-]*)\//)
+      if (licensePart) {
+       document.getElementById("ccmc-info-license").src = "http://i.creativecommons.org/l/"+ licensePart[1] +"/3.0/80x15.png";
+      }
+    }
+    if (info.thumbnail) {
+      document.getElementById("ccmc-info-thumbnail").src = info.thumbnail;
+    }
+  }
+}
+ccMediaCollector.cleanPanelInfo = function() {
+  document.getElementById("ccmc-info-title").value = "";
+  document.getElementById("ccmc-info-author").value = "";
+  document.getElementById("ccmc-info-license").src = "";
+  document.getElementById("ccmc-info-thumbnail").src = "";
+
+}
 window.addEventListener("load", function() { ccMediaCollector.onLoad(); } , false);
 window.addEventListener("unload", function() { ccMediaCollector.onUnload(); } , false);
 

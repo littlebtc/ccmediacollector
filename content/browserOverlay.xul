@@ -2,10 +2,23 @@
 <?xml-stylesheet href="chrome://ccmediacollector/skin/browserOverlay.css" type="text/css"?>
 <!DOCTYPE overlay SYSTEM "chrome://ccmediacollector/locale/browserOverlay.dtd">
 <overlay id="ccmediacollector-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-  <script type="application/x-javascript" src="chrome://ccmediacollector/content/browserOverlay.js"/>  
+  <script type="application/x-javascript" src="chrome://ccmediacollector/content/browserOverlay.js"/>
   <hbox id="urlbar-icons">
     <image id="ccmc-add-button" class="urlbar-icon" 
            src="chrome://ccmediacollector/skin/note_add.png" tooltiptext="&addButton.tooltip;" 
-           insertbefore="feed-button"/>
+           insertbefore="feed-button"
+           onclick="ccMediaCollector.openPanel(this);"/>
+    <panel id="ccmc-info" onpopupshowing="ccMediaCollector.fillPanelInfo();">
+      <hbox id="ccmc-info-container">
+        <vbox>
+          <image id="ccmc-info-thumbnail" style="" />
+        </vbox>
+        <vbox>
+          <label id="ccmc-info-title" class="header" />
+          <label id="ccmc-info-author" class="text-link" />
+          <hbox><image id="ccmc-info-license" /></hbox>
+        </vbox>
+      </hbox>
+    </panel>
   </hbox>
 </overlay>

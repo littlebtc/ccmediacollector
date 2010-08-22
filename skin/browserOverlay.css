@@ -1,0 +1,15 @@
+#ccmc-info-container {
+  padding: 10px;
+}
+
+#ccmc-info-container > vbox {
+  padding: 5px;
+}
+#ccmc-info-thumbnail {
+  max-width: 96px;
+  max-height: 64px;
+}
+
+#ccmc-info-license {
+  margin-top: 5px;
+}

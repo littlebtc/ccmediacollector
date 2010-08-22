@@ -7,3 +7,5 @@ overlay	chrome://browser/content/browser.xul	chrome://ccmediacollector/content/b
 component {4a4005aa-0ff7-4acc-a0d5-5263c3d0320a} components/aboutCollection.js
 contract @mozilla.org/network/protocol/about;1?what=collection {4a4005aa-0ff7-4acc-a0d5-5263c3d0320a}
 
+contract @creativecommons.org.tw/media-collector-bootstrap;1 {bee043f0-ac94-11df-94e2-0800200c9a66}
+category profile-after-change CCMediaCollectorBootstrap @creativecommons.org.tw/media-collector-bootstrap;1 
