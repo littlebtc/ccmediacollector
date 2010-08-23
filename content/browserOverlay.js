@@ -80,7 +80,7 @@ ccMediaCollector.fillPanelInfo = function(anchor) {
   if(gBrowser.selectedBrowser.ccmc) {
     var info = gBrowser.selectedBrowser.ccmc;
     document.getElementById("ccmc-info-title").value = info.title;
-    document.getElementById("ccmc-info-author").value = info.author;
+    document.getElementById("ccmc-info-attribution-name").value = info.attributionName;
     /* Fetch the CC license elements, and display the right icon. XXX: non-cc license? */
     if (info.license) {
       var licensePart = info.license.match(/\/(by[a-z\-]*)\//)
@@ -95,7 +95,7 @@ ccMediaCollector.fillPanelInfo = function(anchor) {
 }
 ccMediaCollector.cleanPanelInfo = function() {
   document.getElementById("ccmc-info-title").value = "";
-  document.getElementById("ccmc-info-author").value = "";
+  document.getElementById("ccmc-info-attribution-name").value = "";
   document.getElementById("ccmc-info-license").src = "";
   document.getElementById("ccmc-info-thumbnail").src = "";
 

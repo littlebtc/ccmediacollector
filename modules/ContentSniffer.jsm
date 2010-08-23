@@ -33,16 +33,16 @@ ContentSniffer.readFromPage = function(document) {
           license = licenseNode.href.replace(/\/[^\/]+$/, "/");
         }
         /* Fetch other information */
-        var authorNode = document.querySelector(".username > a");
-        var author = authorNode.textContent;
-        var authorUrl = authorNode.href;
+        var attributionNode = document.querySelector(".username > a");
+        var attributionName = attributionNode.textContent;
+        var attributionUrl = attributionNode.href;
          
         var titleNode = document.querySelector("h1[property='dc:title']");
         var title = titleNode.textContent;
         
         var thumbnailNode = document.querySelector("link[rel='image_src']");
         var thumbnail = thumbnailNode.href;
-        return { license: license, title: title, author: author, authorUrl: authorUrl, thumbnail: thumbnail};
+        return { license: license, title: title, attributionName: attributionName, attributionUrl: attributionUrl, thumbnail: thumbnail};
       }
     }
   }

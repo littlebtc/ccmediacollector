@@ -15,7 +15,7 @@
         </vbox>
         <vbox>
           <label id="ccmc-info-title" class="header" />
-          <label id="ccmc-info-author" class="text-link" />
+          <label id="ccmc-info-attribution-name" class="text-link" />
           <hbox><image id="ccmc-info-license" /></hbox>
         </vbox>
       </hbox>

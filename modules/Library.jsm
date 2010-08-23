@@ -10,8 +10,8 @@ let Library = {};
 /* Store private objects for library */
 let LibraryPrivate = {};
 
-const dbSchemaString = "(`id` INTEGER PRIMARY KEY NOT NULL, `starred` INTEGER, `type` INTEGER, `url` VARCHAR, `title` VARCHAR, " +
-                       "`author_name` VARCHAR, `author_url` VARCHAR, `source` VARCHAR, "+
+const dbSchemaString = "(`id` INTEGER PRIMARY KEY NOT NULL, `starred` INTEGER, `type` VARCHAR, `url` VARCHAR, `title` VARCHAR, " +
+                       "`attribution_name` VARCHAR, `attribution_url` VARCHAR, `source` VARCHAR, "+
                        "`license_url` VARCHAR, `premits_reproduction` BOOLEAN, `premits_distribution` BOOLEAN, `premits_derivative_works` BOOLEAN,"+
                        "`more_premission_url` VARCHAR, `tags` VARCHAR, `notes` TEXT, `file` VARCHAR, `thumbnail_file` VARCHAR)";
 
