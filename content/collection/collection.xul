@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="chrome://browser/skin/" type="text/css"?>
 <!DOCTYPE page>
 
-<page xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<page xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" onload="collection.onLoad();">
   <script type="application/x-javascript" src="chrome://ccmediacollector/content/collection/collection.js" />
   <!--<stringbundleset id="stringbundleset">
     <stringbundle id="nicomonkey-strings" src="chrome://ccmediacollector/locale/collection.properties"/>
   </stringbundleset>-->
-  <label value="It works!" />
+  <richlistbox id="collectionList" width="200" height="300">
+    <richlistitem>
+    </richlistitem>
+  </richlistbox>
+  <label value="Hello!" />
 </page>

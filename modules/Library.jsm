@@ -12,34 +12,12 @@ let LibraryPrivate = {};
 
 const dbSchemaString = "(`id` INTEGER PRIMARY KEY NOT NULL, `starred` INTEGER, `type` VARCHAR, `url` VARCHAR, `title` VARCHAR, " +
                        "`attribution_name` VARCHAR, `attribution_url` VARCHAR, `source` VARCHAR, "+
-                       "`license_url` VARCHAR, `premits_reproduction` BOOLEAN, `premits_distribution` BOOLEAN, `premits_derivative_works` BOOLEAN,"+
-                       "`more_premission_url` VARCHAR, `tags` VARCHAR, `notes` TEXT, `file` VARCHAR, `thumbnail_file` VARCHAR)";
+                       "`license_url` VARCHAR, `license_nc` BOOLEAN, `license_sa` BOOLEAN, `license_nd` BOOLEAN,"+
+                       "`more_permission_url` VARCHAR, `tags` VARCHAR, `notes` TEXT, `file` VARCHAR, `thumbnail_url` VARCHAR)";
+const dbFields = ["id", "starred", "type", "url", "title", "attribution_name", "attribution_url", "source",
+                 "license_url", "license_nc", "license_sa", "license_nd", "more_permission_url", "tags", "notes", "file", "thumbnail_url"];
 
 Components.utils.import("resource://ccmediacollector/Services.jsm");
-
-Library.startup = function() {
-  var file = Services.dirsvc.get("ProfD", Ci.nsIFile);
-  file.append("ccmediacollector");
-  try {
-    if (!file.exists()) {
-      file.create(Ci.nsIFile.DIRECTORY_TYPE, 0755);
-    } else if (!file.isDirectory() || !file.isWritable()) {
-      throw new Error("ccmediacollector must be a writtable directory.");
-    }
-  } catch(e) {
-    Components.utils.reportError("Fail to create directory for ccmediacollector!!");
-    return;
-  }
-  file.append("library.sqlite");
-
-  if (!file.exists()) {
-    LibraryPrivate.dbConnection = Services.storage.openDatabase(file);
-    /* Add the smilefox database/ table if it is not established */
-    LibraryPrivate.createTable();
-  } else {
-    LibraryPrivate.dbConnection = Services.storage.openDatabase(file);
-  }
-};
 
 LibraryPrivate.createTable = function() {
   var statement = this.dbConnection.createStatement("CREATE TABLE IF NOT EXISTS library" + dbSchemaString);
@@ -104,3 +82,61 @@ function generateStatementCallback(callerName, thisObj, successCallback, failCal
   return callback;  
 }
 
+Library.startup = function() {
+  var file = Services.dirsvc.get("ProfD", Ci.nsIFile);
+  file.append("ccmediacollector");
+  try {
+    if (!file.exists()) {
+      file.create(Ci.nsIFile.DIRECTORY_TYPE, 0755);
+    } else if (!file.isDirectory() || !file.isWritable()) {
+      throw new Error("ccmediacollector must be a writtable directory.");
+    }
+  } catch(e) {
+    Components.utils.reportError("Fail to create directory for ccmediacollector!!");
+    return;
+  }
+  file.append("library.sqlite");
+
+  if (!file.exists()) {
+    LibraryPrivate.dbConnection = Services.storage.openDatabase(file);
+    /* Add the smilefox database/ table if it is not established */
+    LibraryPrivate.createTable();
+  } else {
+    LibraryPrivate.dbConnection = Services.storage.openDatabase(file);
+  }
+};
+
+/* Asynchorouslly get all items */
+Library.getAll = function(thisObj, successCallback, failCallback) {
+  var statement = LibraryPrivate.dbConnection.createStatement("SELECT * FROM `library` ORDER BY `id` DESC");
+  var callback = generateStatementCallback("getAll", thisObj, successCallback, failCallback, dbFields);
+  statement.executeAsync(callback);
+};
+/* Is the library item exists ?*/
+Library.checkExistence = function(url, thisObj, successCallback) {
+  var statement = LibraryPrivate.dbConnection.createStatement("SELECT `url` FROM `library` WHERE `url` = :url");
+  statement.params.url = url;
+  var innerCallback = {
+   successCallback: function(argsArray) { Components.utils.reportError(JSON.stringify(argsArray)); thisObj[successCallback].call(thisObj, url, (argsArray.length > 0)); },
+   failCallback: function() { /* Do nothing */ }
+  }
+  var callback = generateStatementCallback("checkExistence", innerCallback, "successCallback", "failCallback", ["url"]);
+  statement.executeAsync(callback);
+};
+/* Add items into library  XXX: Async */
+Library.add = function(url, info) {
+  var statement = LibraryPrivate.dbConnection.createStatement("INSERT INTO `library` (`type`, `url`, `title`, `attribution_name`, `attribution_url`, `source`, `license_url`, `license_nc`, `license_sa`, `license_nd`, `more_permission_url`, `thumbnail_url`) VALUES (:type, :url, :title, :attribution_name, :attribution_url, :source, :license_url, :license_nc, :license_sa, :license_nd, :more_permission_url, :thumbnail_url)");
+  statement.params["url"] = url;
+  /* Fill license information if needed */
+  if (info.license_url && info.license_url.search(/creativecommons/) != -1) {
+    statement.params["license_nc"] = (info.license_url.search(/\-nc/) != -1);
+    statement.params["license_sa"] = (info.license_url.search(/\-sa/) != -1);
+    statement.params["license_nd"] = (info.license_url.search(/\-nd/) != -1);
+  }
+  for (var key in info) {
+    statement.params[key] = info[key];
+  }
+  statement.execute();
+  statement.reset();
+  var lastInsertRowID = LibraryPrivate.dbConnection.lastInsertRowID;
+};

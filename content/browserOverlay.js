@@ -80,26 +80,49 @@ ccMediaCollector.fillPanelInfo = function(anchor) {
   if(gBrowser.selectedBrowser.ccmc) {
     var info = gBrowser.selectedBrowser.ccmc;
     document.getElementById("ccmc-info-title").value = info.title;
-    document.getElementById("ccmc-info-attribution-name").value = info.attributionName;
+    document.getElementById("ccmc-info-attribution-name").value = info.attribution_name;
     /* Fetch the CC license elements, and display the right icon. XXX: non-cc license? */
-    if (info.license) {
-      var licensePart = info.license.match(/\/(by[a-z\-]*)\//)
+    if (info.license_url) {
+      var licensePart = info.license_url.match(/\/(by[a-z\-]*)\//)
       if (licensePart) {
        document.getElementById("ccmc-info-license").src = "http://i.creativecommons.org/l/"+ licensePart[1] +"/3.0/80x15.png";
       }
     }
-    if (info.thumbnail) {
-      document.getElementById("ccmc-info-thumbnail").src = info.thumbnail;
+    if (info.thumbnail_url) {
+      document.getElementById("ccmc-info-thumbnail").src = info.thumbnail_url;
+    }
+    Components.utils.import("resource://ccmediacollector/Library.jsm");
+    Library.checkExistence(gBrowser.selectedBrowser.currentURI.spec, ccMediaCollector, "updateExistence");
+  }
+};
+/* Update the "collect" button */
+ccMediaCollector.updateExistence = function(url, result) {
+  if(gBrowser.selectedBrowser.currentURI.spec == url) {
+    if (result) {
+      document.getElementById("ccmc-info-collect-button").label = "Collected";
+      document.getElementById("ccmc-info-collect-button").disabled = true;
+    } else {
+      document.getElementById("ccmc-info-collect-button").label = "Collect!";
+      document.getElementById("ccmc-info-collect-button").disabled = false;
     }
   }
-}
+};
+
+/* Clean everything when page switching... */
 ccMediaCollector.cleanPanelInfo = function() {
   document.getElementById("ccmc-info-title").value = "";
   document.getElementById("ccmc-info-attribution-name").value = "";
   document.getElementById("ccmc-info-license").src = "";
   document.getElementById("ccmc-info-thumbnail").src = "";
 
-}
+};
+/* "Collect" the page into the library */
+ccMediaCollector.collectCurrentPage = function() {
+  Components.utils.import("resource://ccmediacollector/Library.jsm");
+  Library.add(gBrowser.selectedBrowser.currentURI.spec, gBrowser.selectedBrowser.ccmc); 
+  Library.checkExistence(gBrowser.selectedBrowser.currentURI.spec, ccMediaCollector, "updateExistence");
+};
+
 window.addEventListener("load", function() { ccMediaCollector.onLoad(); } , false);
 window.addEventListener("unload", function() { ccMediaCollector.onUnload(); } , false);
 
