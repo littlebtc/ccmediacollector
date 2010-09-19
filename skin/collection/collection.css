@@ -1,0 +1,11 @@
+#collectionList > richlistitem {
+  -moz-binding: url("chrome://ccmediacollector/content/collection.xml#ccmc-media-item");
+}
+.thumbnail {
+  -moz-background-size: 75px;
+  background-size: 75px;
+  background-repeat: no-repeat;
+  background-position: center center;
+  width: 75px;
+  height: 75px;
+}
