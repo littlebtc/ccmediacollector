@@ -92,12 +92,13 @@ ccMediaCollector.fillPanelInfo = function(anchor) {
       document.getElementById("ccmc-info-thumbnail").src = info.thumbnail_url;
     }
     Components.utils.import("resource://ccmediacollector/Library.jsm");
-    Library.checkExistence(gBrowser.selectedBrowser.currentURI.spec, ccMediaCollector, "updateExistence");
+    Library.checkExistence(info.url, ccMediaCollector, "updateExistence");
   }
 };
 /* Update the "collect" button */
 ccMediaCollector.updateExistence = function(url, result) {
-  if(gBrowser.selectedBrowser.currentURI.spec == url) {
+  var info = gBrowser.selectedBrowser.ccmc;
+  if(info.url == url) {
     if (result) {
       document.getElementById("ccmc-info-collect-button").label = "Collected";
       document.getElementById("ccmc-info-collect-button").disabled = true;
@@ -118,9 +119,10 @@ ccMediaCollector.cleanPanelInfo = function() {
 };
 /* "Collect" the page into the library */
 ccMediaCollector.collectCurrentPage = function() {
+  var info = gBrowser.selectedBrowser.ccmc;
   Components.utils.import("resource://ccmediacollector/Library.jsm");
-  Library.add(gBrowser.selectedBrowser.currentURI.spec, gBrowser.selectedBrowser.ccmc); 
-  Library.checkExistence(gBrowser.selectedBrowser.currentURI.spec, ccMediaCollector, "updateExistence");
+  Library.add(info.url, gBrowser.selectedBrowser.ccmc); 
+  Library.checkExistence(info.url, ccMediaCollector, "updateExistence");
 };
 
 window.addEventListener("load", function() { ccMediaCollector.onLoad(); } , false);

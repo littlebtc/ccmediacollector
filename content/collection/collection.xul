@@ -1,15 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet href="chrome://browser/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://ccmediacollector/skin/collection/collection.css" type="text/css"?>
 <!DOCTYPE page>
 
-<page xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" onload="collection.onLoad();">
+<page xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+      onload="collection.onLoad();"
+      title="Media Collection">
   <script type="application/x-javascript" src="chrome://ccmediacollector/content/collection/collection.js" />
   <!--<stringbundleset id="stringbundleset">
     <stringbundle id="nicomonkey-strings" src="chrome://ccmediacollector/locale/collection.properties"/>
   </stringbundleset>-->
-  <richlistbox id="collectionList" width="200" height="300">
-    <richlistitem>
-    </richlistitem>
-  </richlistbox>
-  <label value="Hello!" />
+  <hbox flex="1">
+    <tree id="collectionTree"
+          rows="2"
+          width="200"
+          hidecolumnpicker="true"
+          onselect="collection.onTreeSelected(this);" >
+      <treecols>
+        <treecol anonid="title" flex="1" primary="true" hideheader="true"/>
+      </treecols>
+      
+      <treechildren flex="1">
+        <treeitem>
+          <treerow>
+            <treecell label="All items" />
+          </treerow>
+        </treeitem>
+        <treeitem>
+          <treerow>
+            <treecell label="Downloads" />
+          </treerow>
+        </treeitem>
+      </treechildren>
+    </tree>
+    <richlistbox id="collectionList" height="300" flex="1" onselect="collection.onItemSelected(this);">
+    </richlistbox>
+    <groupbox>
+      <caption label="Media Information" />
+      <grid>
+        <columns>
+          <column />
+          <column flex="1"/>
+        </columns>
+        <rows>
+          <row>
+            <label value="URL:" />
+            <label id="mediaInfoURL" />
+         </row>
+         <row>
+           <label value="Title:" />
+           <textbox id="mediaInfoTitle" />
+         </row>
+         <row>
+           <label value="Author:" />
+           <textbox id="mediaInfoAttributionName" />
+         </row>
+         <row>
+           <label value="Attribution URL:" />
+           <textbox id="mediaInfoAttributionURL" />
+         </row>
+         <row>
+           <label value="License:" />
+           <hbox>
+             <image id="mediaInfoLicenseImage" />
+             <label id="mediaInfoLicenseEdit" value="Edit" class="text-link" />
+           </hbox>
+         </row>
+       </rows>
+      </grid>
+      <hbox>
+        <button label="Change" />
+      </hbox>
+      <hbox>
+        <label id="mediaInfoRemove" value="Remove from collection" class="text-link" />
+      </hbox>
+    </groupbox>
+  </hbox>
 </page>
