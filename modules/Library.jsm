@@ -25,9 +25,31 @@ LibraryPrivate.createTable = function() {
   statement.executeAsync(callback);
 
 };
+LibraryPrivate.update = function(id, params) {
+  var sqlString = "UPDATE `library` SET ";
+  for (var key in params) {
+    /* Prevent injection */
+    if(key.search(/[^[0-9a-z\_]/) != -1) { return; }
+    sqlString += "`" + key + "` = :" + key + ",";
+  }
+  sqlString = sqlString.slice(0, -1) + " WHERE `id` = :id";
+  var statement = this.dbConnection.createStatement(sqlString);
+  /* Assume params have right params... */
+  for (var key in params) {
+    statement.params[key] = params[key];
+  }
+  statement.params.id = id;
+  var callback = generateStatementCallback("LibraryPrivate.updateDownload", this, "updateCallback", "dbFail", null, id, params);
+  statement.executeAsync(callback);
+};
+LibraryPrivate.updateCallback = function(id, info) {
+  triggerListeners("update", id, info);
+};
 LibraryPrivate.finishStartup = function() {
 };
 LibraryPrivate.failStartup = function() {
+};
+LibraryPrivate.dbFail = function() {
 };
 /* Generate a mozIStorageStatementCallback implementation.
  * @param callerName       Function name using the callback. Used in error log message.
@@ -140,3 +162,59 @@ Library.add = function(url, info) {
   statement.reset();
   var lastInsertRowID = LibraryPrivate.dbConnection.lastInsertRowID;
 };
+
+/* Call ContentFetcher to fetch an original content for a specific id */
+Library.fetchOriginalContent = function(id) {
+  var statement = LibraryPrivate.dbConnection.createStatement("SELECT * FROM `library` WHERE `id` = :id");
+  statement.params.id = id;
+  var innerCallback = {
+   successCallback: function(argsArray) { 
+     if (argsArray.length != 1) { return; }
+     Components.utils.import("resource://ccmediacollector/ContentFetcher.jsm");
+     ContentFetcher.fetchOriginalContent(argsArray[0].url);
+   },
+   failCallback: function() { /* Do nothing */ }
+  };
+  var callback = generateStatementCallback("fetchOriginalContent", innerCallback, "successCallback", "failCallback", dbFields);
+  statement.executeAsync(callback);
+};
+
+/* Remove item with specific id from library */ 
+Library.remove = function(id) {
+  if (!id) { return; }
+  var statement = LibraryPrivate.dbConnection.createStatement("DELETE FROM `library` WHERE `id` = :id");
+  statement.params.id = id;
+  /* After item removed, notify listeners */
+  var innerCallback = {
+   successCallback: function() { 
+     triggerListeners("remove", id, null);
+   },
+   failCallback: function() { /* Do nothing */ }
+  };
+  var callback = generateStatementCallback("remove", innerCallback, "successCallback", "failCallback", dbFields);
+  statement.executeAsync(callback);
+};
+
+/* Change to some public infos (with filtering) */
+Library.update = function(id, params) {
+  LibraryPrivate.update(id, {title: params['title']});
+};
+
+
+/* Make other instances listens to the changes to the library. */
+let libraryListeners = [];
+
+Library.addListener = function(listener) {
+ libraryListeners.push(listener);
+};
+Library.removeListener = function(listener) {
+  libraryListeners.splice(libraryListeners.indexOf(listener), 1);
+};
+
+/* Trigger all listers for specific event */
+function triggerListeners(eventName, id, content) {
+  for (var i = 0; i < libraryListeners.length; i++)
+  { 
+    if ((typeof libraryListeners[i][eventName]) == 'function') { libraryListeners[i][eventName].call(libraryListeners[i], id, content); }
+  }
+}

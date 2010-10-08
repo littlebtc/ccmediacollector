@@ -2,11 +2,15 @@ var collection = {};
 
 /* Page loading */
 collection.onLoad = function() {
-  Components.utils.import("resource://ccmediacollector/Library.jsm");
-  Library.getAll(this, "showItems", "dbError");
+  Components.utils.import("resource://ccmediacollector/Library.jsm", collection);
+  /* Get all contents */
+  this.Library.getAll(this, "showItems", "dbError");
 };
 /* Display items after get items asynchrously */
 collection.showItems = function(argsArray) {
+  /* Add Listener */
+  this.Library.addListener(this.listener);
+  
   var list = document.getElementById("collectionList");
   for (var i = 0; i < argsArray.length; i++) {
     var item = document.createElement("richlistitem");
@@ -41,6 +45,43 @@ collection.onItemSelected = function(obj) {
   if (item.hasAttribute("licensethumbnail")) {
     document.getElementById("mediaInfoLicenseImage").setAttribute("src", item.getAttribute("licensethumbnail"));
   }
-}
+};
+collection.changeItem = function() {
+  var item = document.getElementById("collectionList").selectedItem;
+  if (!item) { return; }
+  var id = parseInt(item.getAttribute("ccmcid"), 10);
+  if (!id) { return; }
+  Components.utils.import("resource://ccmediacollector/Services.jsm", collection);
+  this.Library.update(id, { title: document.getElementById("mediaInfoTitle").value });
+};
+/* Remove from collection: prompt, ask to remove */
 collection.removeItem = function() {
-}
+  var item = document.getElementById("collectionList").selectedItem;
+  if (!item) { return; }
+  var id = parseInt(item.getAttribute("ccmcid"), 10);
+  if (!id) { return; }
+  Components.utils.import("resource://ccmediacollector/Services.jsm", collection);
+  /* Confirm dialog */
+  var result = this.Services.prompt.confirm(null, "Media Collection", "Are you sure to remove this item from collection?");
+  if (!result) { return; }
+
+  this.Library.remove(id);
+
+};
+/* A listener to collection's event */
+collection.listener = {
+  /* When collection is updated */
+  update: function(id, info) {
+    id = parseInt(id, 10);
+    var node = document.getElementById("collectionList").querySelector("richlistitem[ccmcid='" + id + "']");
+    if (!node) { return; }
+    node.setAttribute("title", info.title);
+  },
+  /* When collection is removed */
+  remove: function(id) {
+    id = parseInt(id, 10);
+    var node = document.getElementById("collectionList").querySelector("richlistitem[ccmcid='" + id + "']");
+    if (!node) { return; }
+    node.parentNode.removeChild(node);
+  }
+};

@@ -61,10 +61,3 @@ ContentSniffer.readFromPage = function(document) {
   
 };
 
-/* Sometimes we need to get "Original Content", which might need another instruction to get */
-ContentSniffer.getOriginalContentUrl = function(url) {
-  /* In the future, we will make every site code to be written as a script, and run it through evalInSandbox. */
-
-  /* Flickr only code */
-  
-};

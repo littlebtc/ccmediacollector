@@ -53,26 +53,26 @@
          </row>
          <row>
            <label value="Author:" />
-           <textbox id="mediaInfoAttributionName" />
+           <textbox id="mediaInfoAttributionName" disabled="true" />
          </row>
          <row>
            <label value="Attribution URL:" />
-           <textbox id="mediaInfoAttributionURL" />
+           <textbox id="mediaInfoAttributionURL" disabled="true" />
          </row>
          <row>
            <label value="License:" />
            <hbox>
              <image id="mediaInfoLicenseImage" />
-             <label id="mediaInfoLicenseEdit" value="Edit" class="text-link" />
+             <!--label id="mediaInfoLicenseEdit" value="Edit" class="text-link" />-->
            </hbox>
          </row>
        </rows>
       </grid>
       <hbox>
-        <button label="Change" />
+        <button label="Change" oncommand="collection.changeItem();"/>
       </hbox>
       <hbox>
-        <label id="mediaInfoRemove" value="Remove from collection" class="text-link" />
+        <label id="mediaInfoRemove" value="Remove from collection" class="text-link" onclick="collection.removeItem();"/>
       </hbox>
     </groupbox>
   </hbox>
