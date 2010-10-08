@@ -62,10 +62,11 @@ ccMediaCollector.onPageLoad = function(aEvent) {
   Components.utils.import("resource://ccmediacollector/ContentSniffer.jsm");
   var info = ContentSniffer.readFromPage(doc);
   if(info) {
-    document.getElementById("ccmc-add-button").hidden = false;
     browser.ccmc = info;
-  } else {
-    document.getElementById("ccmc-add-button").hidden = true;
+    /* Ensure the button is only changed when the document is selected */
+    if (gBrowser.selectedBrowser == browser) {
+      document.getElementById("ccmc-add-button").hidden = false;
+    }
   }
 };
 

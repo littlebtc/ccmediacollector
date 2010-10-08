@@ -55,7 +55,7 @@
          </row>
          <row>
            <label value="Original Title:" />
-           <textbox id="mediaInfoOriginalTitle" disabled="true"/>
+           <label id="mediaInfoOriginalTitle"/>
          </row>
          <row>
            <label value="Author:" />
