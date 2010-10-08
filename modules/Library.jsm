@@ -10,21 +10,25 @@ let Library = {};
 /* Store private objects for library */
 let LibraryPrivate = {};
 
+/* Record these in order to help building SQL strings */
 const dbSchemaString = "(`id` INTEGER PRIMARY KEY NOT NULL, `starred` INTEGER, `type` VARCHAR, `url` VARCHAR, `title` VARCHAR, " +
-                       "`attribution_name` VARCHAR, `attribution_url` VARCHAR, `source` VARCHAR, "+
+                       "`original_title` VARCHAR, `attribution_name` VARCHAR, `attribution_url` VARCHAR, `source` VARCHAR, "+
                        "`license_url` VARCHAR, `license_nc` BOOLEAN, `license_sa` BOOLEAN, `license_nd` BOOLEAN,"+
                        "`more_permission_url` VARCHAR, `tags` VARCHAR, `notes` TEXT, `file` VARCHAR, `thumbnail_url` VARCHAR)";
-const dbFields = ["id", "starred", "type", "url", "title", "attribution_name", "attribution_url", "source",
+const dbFields = ["id", "starred", "type", "url", "title", "original_title", "attribution_name", "attribution_url", "source",
                  "license_url", "license_nc", "license_sa", "license_nd", "more_permission_url", "tags", "notes", "file", "thumbnail_url"];
 
 Components.utils.import("resource://ccmediacollector/Services.jsm");
 
+/* Build Library table */
 LibraryPrivate.createTable = function() {
   var statement = this.dbConnection.createStatement("CREATE TABLE IF NOT EXISTS library" + dbSchemaString);
   var callback = generateStatementCallback("createTable", this, "finishStartup", "failStartup")
   statement.executeAsync(callback);
 
 };
+
+/* Update specific params for a library item */
 LibraryPrivate.update = function(id, params) {
   var sqlString = "UPDATE `library` SET ";
   for (var key in params) {
@@ -42,9 +46,13 @@ LibraryPrivate.update = function(id, params) {
   var callback = generateStatementCallback("LibraryPrivate.updateDownload", this, "updateCallback", "dbFail", null, id, params);
   statement.executeAsync(callback);
 };
+
+/* After updated successfully, trigger listeners */
 LibraryPrivate.updateCallback = function(id, info) {
   triggerListeners("update", id, info);
 };
+
+
 LibraryPrivate.finishStartup = function() {
 };
 LibraryPrivate.failStartup = function() {
@@ -165,7 +173,7 @@ Library.checkExistence = function(url, thisObj, successCallback) {
 /* Add items into library */
 Library.add = function(url, info) {
 
-  var statement = LibraryPrivate.dbConnection.createStatement("INSERT INTO `library` (`type`, `url`, `title`, `attribution_name`, `attribution_url`, `source`, `license_url`, `license_nc`, `license_sa`, `license_nd`, `more_permission_url`, `thumbnail_url`) VALUES (:type, :url, :title, :attribution_name, :attribution_url, :source, :license_url, :license_nc, :license_sa, :license_nd, :more_permission_url, :thumbnail_url)");
+  var statement = LibraryPrivate.dbConnection.createStatement("INSERT INTO `library` (`type`, `url`, `title`, `original_title`, `attribution_name`, `attribution_url`, `source`, `license_url`, `license_nc`, `license_sa`, `license_nd`, `more_permission_url`, `thumbnail_url`) VALUES (:type, :url, :original_title, :title, :attribution_name, :attribution_url, :source, :license_url, :license_nc, :license_sa, :license_nd, :more_permission_url, :thumbnail_url)");
   statement.params["url"] = url;
   /* Fill license information if needed */
   if (info.license_url && info.license_url.search(/creativecommons/) != -1) {

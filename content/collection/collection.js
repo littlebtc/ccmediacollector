@@ -1,4 +1,6 @@
 var collection = {};
+const Cc = Components.classes;
+const Ci = Components.interfaces;
 
 /* Page loading */
 collection.onLoad = function() {
@@ -16,6 +18,7 @@ collection.showItems = function(argsArray) {
     var item = document.createElement("richlistitem");
     item.setAttribute("ccmcid", argsArray[i].id);
     item.setAttribute("title", argsArray[i].title);
+    item.setAttribute("original_title", argsArray[i].original_title);
     item.setAttribute("url", argsArray[i].url);
     item.setAttribute("attribution_name", argsArray[i].attribution_name);
     item.setAttribute("attribution_url", argsArray[i].attribution_url);
@@ -40,12 +43,25 @@ collection.onItemSelected = function(obj) {
   var item = obj.selectedItem;
   document.getElementById("mediaInfoURL").value = item.getAttribute("url");
   document.getElementById("mediaInfoTitle").value = item.getAttribute("title");
+  document.getElementById("mediaInfoOriginalTitle").value = item.getAttribute("original_title");
   document.getElementById("mediaInfoAttributionName").value = item.getAttribute("attribution_name");
   document.getElementById("mediaInfoAttributionURL").value = item.getAttribute("attribution_url");
   if (item.hasAttribute("licensethumbnail")) {
     document.getElementById("mediaInfoLicenseImage").setAttribute("src", item.getAttribute("licensethumbnail"));
   }
 };
+
+/* Open an URL in a new tab when clicking the URL address */
+collection.openURL = function(item) {
+  var url = item.value;
+  /* Use nsIWindowMediator to get mainWindow and gBrowser */
+  var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);  
+  var mainWindow = wm.getMostRecentWindow("navigator:browser");  
+  /* Set referrer to make tab opened position smart */
+  mainWindow.gBrowser.selectedTab = mainWindow.gBrowser.addTab(url, mainWindow.gBrowser.currentURI);
+};
+
+/* Change item in collection */
 collection.changeItem = function() {
   var item = document.getElementById("collectionList").selectedItem;
   if (!item) { return; }
@@ -54,6 +70,7 @@ collection.changeItem = function() {
   Components.utils.import("resource://ccmediacollector/Services.jsm", collection);
   this.Library.update(id, { title: document.getElementById("mediaInfoTitle").value });
 };
+
 /* Remove from collection: prompt, ask to remove */
 collection.removeItem = function() {
   var item = document.getElementById("collectionList").selectedItem;

@@ -11,6 +11,7 @@
     <stringbundle id="nicomonkey-strings" src="chrome://ccmediacollector/locale/collection.properties"/>
   </stringbundleset>-->
   <hbox flex="1">
+   <!--
     <tree id="collectionTree"
           rows="2"
           width="200"
@@ -33,6 +34,7 @@
         </treeitem>
       </treechildren>
     </tree>
+    -->
     <richlistbox id="collectionList" height="300" flex="1" onselect="collection.onItemSelected(this);">
     </richlistbox>
     <groupbox>
@@ -45,11 +47,15 @@
         <rows>
           <row>
             <label value="URL:" />
-            <label id="mediaInfoURL" />
+            <label id="mediaInfoURL" class="text-link" onclick="collection.openURL(this);"/>
          </row>
          <row>
            <label value="Title:" />
            <textbox id="mediaInfoTitle" />
+         </row>
+         <row>
+           <label value="Original Title:" />
+           <textbox id="mediaInfoOriginalTitle" disabled="true"/>
          </row>
          <row>
            <label value="Author:" />

@@ -54,7 +54,7 @@ ContentSniffer.readFromPage = function(document) {
         
         var thumbnailNode = document.querySelector("link[rel='image_src']");
         var thumbnail = thumbnailNode.href;
-        return { url: url, license_url: license, title: title, attribution_name: attributionName, attribution_url: attributionUrl, thumbnail_url: thumbnail};
+        return { url: url, license_url: license, title: title, original_title: title, attribution_name: attributionName, attribution_url: attributionUrl, thumbnail_url: thumbnail};
       }
     }
   }
