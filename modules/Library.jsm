@@ -255,7 +255,9 @@ Library.addListener = function(listener) {
  libraryListeners.push(listener);
 };
 Library.removeListener = function(listener) {
-  libraryListeners.splice(libraryListeners.indexOf(listener), 1);
+  if (libraryListeners.indexOf(listener) > -1) {
+    libraryListeners.splice(libraryListeners.indexOf(listener), 1);
+  }
 };
 
 /* Trigger all listers for specific event */

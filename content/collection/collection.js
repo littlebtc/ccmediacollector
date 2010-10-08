@@ -8,6 +8,10 @@ collection.onLoad = function() {
   /* Get all contents */
   this.Library.getAll(this, "showItems", "dbError");
 };
+collection.onUnload = function() {
+  this.Library.removeListener(this.listener);
+};
+
 /* Display items after get items asynchrously */
 collection.showItems = function(argsArray) {
   /* Add Listener */
@@ -41,6 +45,7 @@ collection.dbError = function() {
 collection.onItemSelected = function(obj) {
   /* Update the information <groupbox> */
   var item = obj.selectedItem;
+  if (!item) { return; }
   document.getElementById("mediaInfoURL").value = item.getAttribute("url");
   document.getElementById("mediaInfoTitle").value = item.getAttribute("title");
   document.getElementById("mediaInfoOriginalTitle").value = item.getAttribute("original_title");
@@ -84,6 +89,13 @@ collection.removeItem = function() {
 
   this.Library.remove(id);
 
+  /* Clean all items on the right panel */
+  document.getElementById("mediaInfoURL").value = "";
+  document.getElementById("mediaInfoTitle").value = "";
+  document.getElementById("mediaInfoOriginalTitle").value = "";
+  document.getElementById("mediaInfoAttributionName").value = "";
+  document.getElementById("mediaInfoAttributionURL").value = "";
+  document.getElementById("mediaInfoLicenseImage").removeAttribute("src");
 };
 /* A listener to collection's event */
 collection.listener = {
@@ -99,6 +111,8 @@ collection.listener = {
     id = parseInt(id, 10);
     var node = document.getElementById("collectionList").querySelector("richlistitem[ccmcid='" + id + "']");
     if (!node) { return; }
-    node.parentNode.removeChild(node);
+    /* Deselect before removing, fix strange selectedItem behavior. */
+    document.getElementById("collectionList").removeItemFromSelection(node);
+    document.getElementById("collectionList").removeChild(node);
   }
 };

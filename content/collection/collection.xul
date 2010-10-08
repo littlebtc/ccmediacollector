@@ -4,7 +4,7 @@
 <!DOCTYPE page>
 
 <page xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-      onload="collection.onLoad();"
+      onload="collection.onLoad();" onunload="collection.onUnload();"
       title="Media Collection">
   <script type="application/x-javascript" src="chrome://ccmediacollector/content/collection/collection.js" />
   <!--<stringbundleset id="stringbundleset">
