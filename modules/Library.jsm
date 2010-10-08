@@ -104,6 +104,7 @@ function generateStatementCallback(callerName, thisObj, successCallback, failCal
   return callback;  
 }
 
+/* At startup, create database / tables if needed */
 Library.startup = function() {
   var file = Services.dirsvc.get("ProfD", Ci.nsIFile);
   file.append("ccmediacollector");
@@ -126,6 +127,22 @@ Library.startup = function() {
   } else {
     LibraryPrivate.dbConnection = Services.storage.openDatabase(file);
   }
+
+  /* Create thumbnail cache directory */
+  var file = Services.dirsvc.get("ProfD", Ci.nsIFile);
+  file.append("ccmediacollector");
+  file.append("thumbnailcache");
+  try {
+    if (!file.exists()) {
+      file.create(Ci.nsIFile.DIRECTORY_TYPE, 0755);
+    } else if (!file.isDirectory() || !file.isWritable()) {
+      throw new Error("thumbnailcache must be a writtable directory.");
+    }
+  } catch(e) {
+    Components.utils.reportError("Fail to create directory for ccmediacollector/thumbnailcache!!");
+    return;
+  }
+
 };
 
 /* Asynchorouslly get all items */
@@ -145,8 +162,9 @@ Library.checkExistence = function(url, thisObj, successCallback) {
   var callback = generateStatementCallback("checkExistence", innerCallback, "successCallback", "failCallback", ["url"]);
   statement.executeAsync(callback);
 };
-/* Add items into library  XXX: Async */
+/* Add items into library */
 Library.add = function(url, info) {
+
   var statement = LibraryPrivate.dbConnection.createStatement("INSERT INTO `library` (`type`, `url`, `title`, `attribution_name`, `attribution_url`, `source`, `license_url`, `license_nc`, `license_sa`, `license_nd`, `more_permission_url`, `thumbnail_url`) VALUES (:type, :url, :title, :attribution_name, :attribution_url, :source, :license_url, :license_nc, :license_sa, :license_nd, :more_permission_url, :thumbnail_url)");
   statement.params["url"] = url;
   /* Fill license information if needed */
@@ -161,6 +179,19 @@ Library.add = function(url, info) {
   statement.execute();
   statement.reset();
   var lastInsertRowID = LibraryPrivate.dbConnection.lastInsertRowID;
+
+  if (info.thumbnail_url) {
+    /* Thumbnail cache, XXX: Should be split out and error-safe */
+    Components.utils.import("resource://ccmediacollector/DownloadUtils.jsm");
+    var file = Services.dirsvc.get("ProfD", Ci.nsIFile);
+    file.append("ccmediacollector");
+    file.append("thumbnailcache");
+    file.append(lastInsertRowID + ".jpg");
+    var dlInstance = new DownloadUtils();
+    dlInstance.callback = function() {};
+    dlInstance.init(info.thumbnail_url, file);
+    LibraryPrivate.update(lastInsertRowID, {thumbnail_url: Services.io.newFileURI(file).spec});
+  }
 };
 
 /* Call ContentFetcher to fetch an original content for a specific id */
@@ -188,6 +219,14 @@ Library.remove = function(id) {
   var innerCallback = {
    successCallback: function() { 
      triggerListeners("remove", id, null);
+     /* Remove thumbnail cache if needed */
+     var file = Services.dirsvc.get("ProfD", Ci.nsIFile);
+     file.append("ccmediacollector");
+     file.append("thumbnailcache");
+     file.append(id + ".jpg");
+     if (file.exists()) {
+       file.remove(false);
+     }
    },
    failCallback: function() { /* Do nothing */ }
   };
