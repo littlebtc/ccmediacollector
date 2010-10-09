@@ -3,6 +3,10 @@
 <!DOCTYPE overlay SYSTEM "chrome://ccmediacollector/locale/browserOverlay.dtd">
 <overlay id="ccmediacollector-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   <script type="application/x-javascript" src="chrome://ccmediacollector/content/browserOverlay.js"/>
+  <menupopup id="menu_ToolsPopup">
+      <menuitem id="ccmc" label="Media Collection..." insertbefore="javascriptConsole" oncommand="gBrowser.selectedTab = gBrowser.addTab('about:collection', gBrowser.currentURI);"/>
+  </menupopup>
+  
   <hbox id="urlbar-icons">
     <image id="ccmc-add-button" class="urlbar-icon" 
            src="chrome://ccmediacollector/skin/note_add.png" tooltiptext="&addButton.tooltip;" 
