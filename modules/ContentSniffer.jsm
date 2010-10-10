@@ -40,6 +40,10 @@ ContentSniffer.readFromPage = function(document) {
         if (licenseNode) {
           /* As Flickr appends deed.xx on rel="license" link, remove it if needed */
           license = licenseNode.href.replace(/\/[^\/]+$/, "/");
+        } else {
+          /* Workaround for self photo license tag */
+            var licenseNode = document.querySelector(".license-setting a[href^='http://creativecommons.org/licenses']");
+            if (licenseNode) { license = licenseNode.href.replace(/\/[^\/]+$/, "/"); }
         }
         /* Do nothing for non-CC-licensed Flickr photos */
         if (!license) { return; }
