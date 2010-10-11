@@ -5,8 +5,8 @@
     <em:name>CC Media Collector</em:name>
     <em:version>0.1</em:version>
     <em:description>Collect and reuse Creative Commons licensed materials, right in your browser.</em:description>
-    <em:creator>Creative Commons Taiwan</em:creator>
-    <em:contributor>littlebtc (initial developer)</em:contributor>
+    <em:creator>littlebtc</em:creator>
+    <em:contributor>Creative Commons Taiwan</em:contributor>
     <em:homepageURL>http://creativecommons.org.tw/</em:homepageURL>
     <em:targetApplication>
       <Description>
