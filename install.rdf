@@ -3,7 +3,7 @@
   <Description about="urn:mozilla:install-manifest">
     <em:id>mediacollector@creativecommons.org.tw</em:id>
     <em:name>CC Media Collector</em:name>
-    <em:version>0.1</em:version>
+    <em:version>0.2</em:version>
     <em:description>Collect and reuse Creative Commons licensed materials, right in your browser.</em:description>
     <em:creator>littlebtc</em:creator>
     <em:contributor>Creative Commons Taiwan</em:contributor>

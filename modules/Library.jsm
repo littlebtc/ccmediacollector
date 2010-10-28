@@ -52,6 +52,32 @@ LibraryPrivate.updateCallback = function(id, info) {
   triggerListeners("update", id, info);
 };
 
+/* Run ContentFetcher for a specific library item 
+ * @param info Object of the item that needs to be fetched.
+ */
+LibraryPrivate.exectueFetch = function(info) {
+  Components.utils.import("resource://ccmediacollector/ContentFetcher.jsm");
+  /* Create a tiny listener to make fetchCallback receive the callback events with item id. */
+  var callback = function(type, value) {
+    LibraryPrivate.handleDownloadEvent(info.id, type, value);
+  };
+  ContentFetcher.getOriginalContent(info.url, info.title, callback);
+};
+
+/* Handle the DownloadUtils event. */
+LibraryPrivate.handleDownloadEvent = function(id, type, value) {
+  switch(type) {
+    /* Video download is started */
+    case "start":
+    break;
+    case "progress_change":
+    break;
+    case "completed":
+    break;
+    case "fail":
+    break;
+  }
+};
 
 LibraryPrivate.finishStartup = function() {
 };
@@ -150,7 +176,9 @@ Library.startup = function() {
     Components.utils.reportError("Fail to create directory for ccmediacollector/thumbnailcache!!");
     return;
   }
-
+  /* Startup and set ContentFetcher path */
+  Components.utils.import("resource://ccmediacollector/ContentFetcher.jsm");
+  ContentFetcher.startup();
 };
 
 /* Asynchorouslly get all items */
@@ -187,7 +215,6 @@ Library.add = function(url, info) {
   statement.execute();
   statement.reset();
   var lastInsertRowID = LibraryPrivate.dbConnection.lastInsertRowID;
-
   if (info.thumbnail_url) {
     /* Thumbnail cache, XXX: Should be split out and error-safe */
     Components.utils.import("resource://ccmediacollector/DownloadUtils.jsm");
@@ -200,17 +227,19 @@ Library.add = function(url, info) {
     dlInstance.init(info.thumbnail_url, file);
     LibraryPrivate.update(lastInsertRowID, {thumbnail_url: Services.io.newFileURI(file).spec});
   }
+  /* Call executeFetch to get original content. XXX: Should we add another addAndFetch function? */
+  info.id = lastInsertRowID;
+  LibraryPrivate.exectueFetch(info);
 };
 
-/* Call ContentFetcher to fetch an original content for a specific id */
+/* Fetch an original content for a specific id */
 Library.fetchOriginalContent = function(id) {
   var statement = LibraryPrivate.dbConnection.createStatement("SELECT * FROM `library` WHERE `id` = :id");
   statement.params.id = id;
   var innerCallback = {
    successCallback: function(argsArray) { 
      if (argsArray.length != 1) { return; }
-     Components.utils.import("resource://ccmediacollector/ContentFetcher.jsm");
-     ContentFetcher.fetchOriginalContent(argsArray[0].url);
+     LibraryPrivate.executeFetch(argsArray[0]);
    },
    failCallback: function() { /* Do nothing */ }
   };

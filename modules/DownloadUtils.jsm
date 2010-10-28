@@ -11,6 +11,7 @@ let DownloadUtils = {};
 
 Components.utils.import("resource://ccmediacollector/Services.jsm");
 
+
 let DownloadUtils = function() { };
 DownloadUtils.prototype = {
   /* Store the file instance */
@@ -114,3 +115,4 @@ DownloadUtils.prototype = {
     this.callback("cancel",{});
   }
 };
+
