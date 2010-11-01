@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet href="chrome://browser/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://ccmediacollector/skin/collection/collection.css" type="text/css"?>
-<!DOCTYPE page>
+<!DOCTYPE page SYSTEM "chrome://ccmediacollector/locale/collection/collection.dtd">
 
 <page xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
       onload="collection.onLoad();" onunload="collection.onUnload();"
@@ -10,6 +10,26 @@
   <!--<stringbundleset id="stringbundleset">
     <stringbundle id="nicomonkey-strings" src="chrome://ccmediacollector/locale/collection.properties"/>
   </stringbundleset>-->
+  <!-- Popup set for library item -->
+  <popupset id="libraryItemPopupset">
+    <menupopup id="libraryItemPopup" onpopupshowing="return collection.generateContextMenu(event);" onpopuphiding="">
+      <menuitem label="&popup.fetch.label;" accesskey="&popup.fetch.accesskey;" id="libraryItemPopupFetch" default="true" 
+        oncommand= "collection.popup.fetch(document.getElementById('collectionList').selectedItem);"/>
+      <menuitem label="&popup.open.label;" accesskey="&popup.open.accesskey;" id="libraryItemPopupOpen" default="true" 
+        oncommand= "collection.popup.open(document.getElementById('collectionList').selectedItem);"/>
+      <menuitem label="&popup.openFolder.label;"  accesskey="&popup.openFolder.accesskey;" id="libraryItemPopupOpenFolder"
+        oncommand= "collection.popup.openFolder(document.getElementById('collectionList').selectedItem);"/>
+      <menuseparator id="libraryItemPopupSeparator1" />
+      <menuitem label="&popup.go.label;" accesskey="&popup.go.accesskey;" id="libraryItemPopupGo"
+        oncommand= "collection.popup.go(document.getElementById('collectionList').selectedItem);"/>
+      <menuitem label="&popup.copy.label;" accesskey="&popup.copy.accesskey;" id="libraryItemPopupCopy"
+        oncommand= "collection.popup.copyVideoUrl(document.getElementById('collectionList').selectedItem);"/>
+      <menuseparator id="libraryItemPopupSeparator2" />
+      <menuitem label="&popup.remove.label;" accesskey="&popup.remove.accesskey;" id="libraryItemPopupRemove"
+        oncommand= "collection.removeItem();"/>
+    </menupopup>
+  </popupset>
+  
   <hbox flex="1">
    <!--
     <tree id="collectionTree"
@@ -35,7 +55,7 @@
       </treechildren>
     </tree>
     -->
-    <richlistbox id="collectionList" height="300" flex="1" onselect="collection.onItemSelected(this);">
+    <richlistbox id="collectionList" height="300" flex="1" onselect="collection.onItemSelected(this);" context="libraryItemPopup">
     </richlistbox>
     <groupbox>
       <caption label="Media Information" />
@@ -47,7 +67,7 @@
         <rows>
           <row>
             <label value="URL:" />
-            <label id="mediaInfoURL" class="text-link" onclick="collection.openURL(this);"/>
+            <label id="mediaInfoURL" class="text-link" onclick="if (this.value) collection.openURL(this.value);"/>
          </row>
          <row>
            <label value="Title:" />

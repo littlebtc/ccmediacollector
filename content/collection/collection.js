@@ -2,9 +2,11 @@ var collection = {};
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
+Components.utils.import("resource://ccmediacollector/Services.jsm", collection);
+Components.utils.import("resource://ccmediacollector/Library.jsm", collection);
+
 /* Page loading */
 collection.onLoad = function() {
-  Components.utils.import("resource://ccmediacollector/Library.jsm", collection);
   /* Get all contents */
   this.Library.getAll(this, "showItems", "dbError");
 };
@@ -35,6 +37,9 @@ collection.showItems = function(argsArray) {
         item.setAttribute("licensethumbnail", "http://i.creativecommons.org/l/"+ licensePart[1] +"/3.0/80x15.png");
       }
     }
+    if (argsArray[i].file) {
+      item.setAttribute("file", argsArray[i].file);
+    }
     list.appendChild(item);
     item.thumbnail = argsArray[i].thumbnail_url;
   }
@@ -57,8 +62,7 @@ collection.onItemSelected = function(obj) {
 };
 
 /* Open an URL in a new tab when clicking the URL address */
-collection.openURL = function(item) {
-  var url = item.value;
+collection.openURL = function(url) {
   /* Use nsIWindowMediator to get mainWindow and gBrowser */
   var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);  
   var mainWindow = wm.getMostRecentWindow("navigator:browser");  
@@ -72,7 +76,6 @@ collection.changeItem = function() {
   if (!item) { return; }
   var id = parseInt(item.getAttribute("ccmcid"), 10);
   if (!id) { return; }
-  Components.utils.import("resource://ccmediacollector/Services.jsm", collection);
   this.Library.update(id, { title: document.getElementById("mediaInfoTitle").value });
 };
 
@@ -82,7 +85,6 @@ collection.removeItem = function() {
   if (!item) { return; }
   var id = parseInt(item.getAttribute("ccmcid"), 10);
   if (!id) { return; }
-  Components.utils.import("resource://ccmediacollector/Services.jsm", collection);
   /* Confirm dialog */
   var result = this.Services.prompt.confirm(null, "Media Collection", "Are you sure to remove this item from collection?");
   if (!result) { return; }
@@ -97,6 +99,89 @@ collection.removeItem = function() {
   document.getElementById("mediaInfoAttributionURL").value = "";
   document.getElementById("mediaInfoLicenseImage").removeAttribute("src");
 };
+
+/* Generate context menu item right when user right-click on the item */
+collection.generateContextMenu = function(aEvent) {
+  /* Check for context menu showing */
+  if (aEvent.target.id != "libraryItemPopup") {
+    return false;
+  }
+  var selectedItem = document.getElementById("collectionList").selectedItem;
+  if (!selectedItem) { return false; }
+  
+  /* Create context menu, depending on the selected item */
+  var popup = document.getElementById("libraryItemPopup");
+   
+  var menuitems = popup.childNodes;
+  for (var i = 0; i < menuitems.length; i++) {
+    menuitems[i].hidden = true;
+  } 
+  
+  /* Check if we have the file */
+  if (selectedItem.hasAttribute("file")) {
+    var file = new this._fileInstance(selectedItem.getAttribute("file"));
+    if (file.exists()) {
+      document.getElementById("libraryItemPopupOpen").hidden = false;
+      document.getElementById("libraryItemPopupOpenFolder").hidden = false;
+      document.getElementById("libraryItemPopupSeparator1").hidden = false;
+    } else {
+      //document.getElementById("libraryItemPopupFetch").hidden = false;
+    }
+  }
+  /* Some required items, hard-coded for now */
+  //document.getElementById("libraryItemPopupSeparator1").hidden = false;
+  document.getElementById("libraryItemPopupGo").hidden = false;
+  document.getElementById("libraryItemPopupCopy").hidden = false;
+  document.getElementById("libraryItemPopupSeparator2").hidden = false;
+  document.getElementById("libraryItemPopupRemove").hidden = false;
+  return true;
+}
+
+/* Context menu commands */
+collection.popup = {
+  open: function(selectedItem) {
+    /* Open if the file exists */
+    var file = new collection._fileInstance(selectedItem.getAttribute("file"));
+    if (!file.exists()) { return; }
+    /* Try to do the default action */
+    try {
+      file.launch();
+    } catch(e) {
+      /* For *nix, launch() didn't work, so...  */
+      /* See also: http://mxr.mozilla.org/seamonkey/source/toolkit/mozapps/downloads/content/downloads.js */
+      var fileUri = this.Services.io.newFileURI(file);
+      var protocolService = Cc["@mozilla.org/uriloader/external-protocol-service;1"].getService(Ci.nsIExternalProtocolService);
+      protocolService.loadUrl(fileUri);
+    }
+    
+  },
+  openFolder: function(selectedItem) {
+    /* Open if the file exists */
+    var file = new collection._fileInstance(selectedItem.getAttribute("file"));
+    if (!file.exists()) { return; }
+    try {
+      file.reveal();
+    } catch(e) {
+      /* For *nix, reveal() didn't work, so...  */
+      /* See also: http://mxr.mozilla.org/seamonkey/source/toolkit/mozapps/downloads/content/downloads.js */
+      var filePathUri = nicofox.Services.io.newFileURI(file.parent);
+      var protocolService = Cc["@mozilla.org/uriloader/external-protocol-service;1"].getService(Ci.nsIExternalProtocolService);
+      protocolService.loadUrl(filePathUri);
+    }
+  },
+  go: function(selectedItem) {
+    var url = selectedItem.getAttribute("url");
+    collection.openURL(url);
+  },
+  /* Copy the video URL */
+  copy: function(selectedItem) {
+    var url = selectedItem.getAttribute("url");
+    var clipboardHelper = Cc["@mozilla.org/widget/clipboardhelper;1"].getService(Ci.nsIClipboardHelper);  
+    clipboardHelper.copyString(url);  
+  },
+  
+};
+
 /* A listener to collection's event */
 collection.listener = {
   /* When collection is updated */
@@ -104,7 +189,13 @@ collection.listener = {
     id = parseInt(id, 10);
     var node = document.getElementById("collectionList").querySelector("richlistitem[ccmcid='" + id + "']");
     if (!node) { return; }
-    node.setAttribute("title", info.title);
+    /* Update info if needed */
+    if (info.title) {
+      node.setAttribute("title", info.title);
+    }
+    if (info.file) {
+      node.setAttribute("file", info.file);
+    }
   },
   /* When collection is removed */
   remove: function(id) {
@@ -116,3 +207,5 @@ collection.listener = {
     document.getElementById("collectionList").removeChild(node);
   }
 };
+/* Helper: Get a nsILocalFile instance from a path */
+collection._fileInstance = Components.Constructor("@mozilla.org/file/local;1", "nsILocalFile", "initWithPath");

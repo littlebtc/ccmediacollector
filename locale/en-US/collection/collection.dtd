@@ -1,0 +1,17 @@
+<!ENTITY popup.cancel.label "Cancel Download">
+<!ENTITY popup.cancel.accesskey "C">
+<!ENTITY popup.fetch.label "Fetch Original File">
+<!ENTITY popup.fetch.accesskey "E">
+<!ENTITY popup.open.label "Open">
+<!ENTITY popup.open.accesskey "O">
+<!ENTITY popup.openFolder.label "Open Containing Folder">
+<!ENTITY popup.openFolder.accesskey "F">
+<!ENTITY popup.go.label "Go to Original Page">
+<!ENTITY popup.go.accesskey "G">
+<!ENTITY popup.copy.label "Copy Page URL">
+<!ENTITY popup.copy.accesskey "C">
+<!ENTITY popup.selectAll.label "Select All">
+<!ENTITY popup.selectAll.accesskey "A">
+<!ENTITY popup.remove.label "Remove from List">
+<!ENTITY popup.remove.accesskey "R">
+

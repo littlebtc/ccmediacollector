@@ -69,10 +69,17 @@ LibraryPrivate.handleDownloadEvent = function(id, type, value) {
   switch(type) {
     /* Video download is started */
     case "start":
+      triggerListeners("fetchStarted", id, value);
     break;
     case "progress_change":
+      triggerListeners("fetchProgress", id, value);
     break;
     case "completed":
+      /* Record the file name */
+      if (value instanceof Ci.nsIFile) {
+        LibraryPrivate.update(id, {file: value.path});
+      }
+      triggerListeners("fetchCompleted", id, value);
     break;
     case "fail":
     break;
@@ -187,15 +194,15 @@ Library.getAll = function(thisObj, successCallback, failCallback) {
   var callback = generateStatementCallback("getAll", thisObj, successCallback, failCallback, dbFields);
   statement.executeAsync(callback);
 };
-/* Is the library item exists ?*/
+/* Is the library item exists ? If yes, return the id of the item. */
 Library.checkExistence = function(url, thisObj, successCallback) {
-  var statement = LibraryPrivate.dbConnection.createStatement("SELECT `url` FROM `library` WHERE `url` = :url");
+  var statement = LibraryPrivate.dbConnection.createStatement("SELECT `id`, `url` FROM `library` WHERE `url` = :url");
   statement.params.url = url;
   var innerCallback = {
-   successCallback: function(argsArray) { Components.utils.reportError(JSON.stringify(argsArray)); thisObj[successCallback].call(thisObj, url, (argsArray.length > 0)); },
+   successCallback: function(argsArray) { thisObj[successCallback].call(thisObj, url, (argsArray.length > 0)? argsArray[0].id : null); },
    failCallback: function() { /* Do nothing */ }
   }
-  var callback = generateStatementCallback("checkExistence", innerCallback, "successCallback", "failCallback", ["url"]);
+  var callback = generateStatementCallback("checkExistence", innerCallback, "successCallback", "failCallback", ["id", "url"]);
   statement.executeAsync(callback);
 };
 /* Add items into library */
@@ -230,6 +237,7 @@ Library.add = function(url, info) {
   /* Call executeFetch to get original content. XXX: Should we add another addAndFetch function? */
   info.id = lastInsertRowID;
   LibraryPrivate.exectueFetch(info);
+  return lastInsertRowID;
 };
 
 /* Fetch an original content for a specific id */

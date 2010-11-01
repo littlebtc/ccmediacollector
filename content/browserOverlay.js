@@ -6,15 +6,42 @@ var ccMediaCollector = {};
 ccMediaCollector.onLoad = function() {
   var appcontent = document.getElementById("appcontent");
   appcontent.addEventListener("DOMContentLoaded", ccMediaCollector.onPageLoad, true);
-  gBrowser.addProgressListener(this.listener, Ci.nsIWebProgress.NOTIFY_LOCATION);  
+  gBrowser.addProgressListener(this.progressListener, Ci.nsIWebProgress.NOTIFY_LOCATION);  
+  Components.utils.import("resource://ccmediacollector/Library.jsm", ccMediaCollector);
+  this.Library.addListener(this.libraryListener);
   
 };
 /* Fire when browser.js is unloading. */
 ccMediaCollector.onUnload = function() {
-  gBrowser.removeProgressListener(this.listener);  
+  gBrowser.removeProgressListener(this.progressListener);  
+  this.Library.removeListener(this.libraryListener);
   
 };
-ccMediaCollector.listener = {
+/* Listenes to collection item modification and fetch progress. */
+ccMediaCollector.libraryListener = {
+  /* Update fetch progress */
+  fetchProgress: function(id, value) {
+    if (document.getElementById("ccmc-info-title").hasAttribute("ccmc-id") &&
+        document.getElementById("ccmc-info-title").getAttribute("ccmc-id") == id) {
+      document.getElementById("ccmc-info-collect-button").hidden = true;
+      document.getElementById("ccmc-info-fetch-progress").hidden = false;
+      document.getElementById("ccmc-info-fetch-progress").setAttribute("mode", "determined");
+      document.getElementById("ccmc-info-fetch-progress").setAttribute("value", value.currentBytes);
+      document.getElementById("ccmc-info-fetch-progress").setAttribute("max", value.maxBytes);
+    }
+  },
+  /* When fetch completed, hide the progress meter, show "Collected" button */
+  fetchCompleted: function(id, value) {
+    if (document.getElementById("ccmc-info-title").hasAttribute("ccmc-id") &&
+        document.getElementById("ccmc-info-title").getAttribute("ccmc-id") == id) {
+      document.getElementById("ccmc-info-collect-button").hidden = false;
+      document.getElementById("ccmc-info-fetch-progress").hidden = true;
+      document.getElementById("ccmc-info-fetch-progress").setAttribute("mode", "undetermined");
+    }
+  }
+}
+/* Listens to browser progress. */
+ccMediaCollector.progressListener = {
   QueryInterface: function(aIID) {
    if (aIID.equals(Ci.nsIWebProgressListener) ||
        aIID.equals(Ci.nsISupportsWeakReference) ||
@@ -32,7 +59,6 @@ ccMediaCollector.listener = {
       gBrowser.selectedBrowser.ccmc = null;
     }
   },
-
   onLocationChange: function(aProgress, aRequest, aURI) {
     if (gBrowser.selectedBrowser.ccmc) {
       document.getElementById("ccmc-add-button").hidden = false;
@@ -90,17 +116,17 @@ ccMediaCollector.fillPanelInfo = function(anchor) {
       }
     }
     if (info.thumbnail_url) {
-      document.getElementById("ccmc-info-thumbnail").src = info.thumbnail_url;
+      document.getElementById("ccmc-info-thumbnail").style.backgroundImage = "url(" + info.thumbnail_url + ")";
     }
-    Components.utils.import("resource://ccmediacollector/Library.jsm");
-    Library.checkExistence(info.url, ccMediaCollector, "updateExistence");
+    this.Library.checkExistence(info.url, ccMediaCollector, "updateExistence");
   }
 };
 /* Update the "collect" button */
-ccMediaCollector.updateExistence = function(url, result) {
+ccMediaCollector.updateExistence = function(url, id) {
   var info = gBrowser.selectedBrowser.ccmc;
   if(info.url == url) {
-    if (result) {
+    if (id) {
+      document.getElementById("ccmc-info-title").setAttribute("ccmc-id", id);
       document.getElementById("ccmc-info-collect-button").label = "Collected";
       document.getElementById("ccmc-info-collect-button").disabled = true;
     } else {
@@ -112,18 +138,26 @@ ccMediaCollector.updateExistence = function(url, result) {
 
 /* Clean everything when page switching... */
 ccMediaCollector.cleanPanelInfo = function() {
+  document.getElementById("ccmc-info-title").removeAttribute("ccmc-id");
   document.getElementById("ccmc-info-title").value = "";
   document.getElementById("ccmc-info-attribution-name").value = "";
   document.getElementById("ccmc-info-license").src = "";
-  document.getElementById("ccmc-info-thumbnail").src = "";
+  document.getElementById("ccmc-info-thumbnail").style.backgroundImage = "";
+  document.getElementById("ccmc-info-collect-button").hidden = false;
+  document.getElementById("ccmc-info-fetch-progress").hidden = true;
+  document.getElementById("ccmc-info-fetch-progress").setAttribute("mode", "undetermined");
 
 };
 /* "Collect" the page into the library */
 ccMediaCollector.collectCurrentPage = function() {
   var info = gBrowser.selectedBrowser.ccmc;
-  Components.utils.import("resource://ccmediacollector/Library.jsm");
-  Library.add(info.url, gBrowser.selectedBrowser.ccmc); 
-  Library.checkExistence(info.url, ccMediaCollector, "updateExistence");
+  var id = this.Library.add(info.url, gBrowser.selectedBrowser.ccmc); 
+  document.getElementById("ccmc-info-title").setAttribute("ccmc-id", id);
+  document.getElementById("ccmc-info-collect-button").hidden = true;
+  document.getElementById("ccmc-info-fetch-progress").hidden = false;
+  /* Use checkExistence to change the status to "Collected"
+     However, since the button is hidden, it will be displayed after download completed. */
+  this.Library.checkExistence(info.url, ccMediaCollector, "updateExistence");
 };
 
 window.addEventListener("load", function() { ccMediaCollector.onLoad(); } , false);

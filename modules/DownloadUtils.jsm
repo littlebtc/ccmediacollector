@@ -76,6 +76,8 @@ DownloadUtils.prototype = {
             this._parentInstance.failDownload();
             return;
           }
+          /* Download successfully, notify the listener */
+          this._parentInstance.completeAll();
         }
       },
       onProgressChange: function (aWebProgress, aRequest,
@@ -103,7 +105,8 @@ DownloadUtils.prototype = {
     this.callback("fail", {});
   },
   completeAll: function() {
-    this.callback("completed", {});
+    /* When completed, return the nsIFile instance to make Library.jsm record the file name. */
+    this.callback("completed", this._file);
   },
   /* Cancel by download manager action */
   cancel: function() {

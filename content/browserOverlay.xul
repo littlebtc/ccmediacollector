@@ -17,11 +17,12 @@
         <vbox>
           <image id="ccmc-info-thumbnail" style="" />
         </vbox>
-        <vbox>
+        <vbox flex="1">
           <label id="ccmc-info-title" class="header" />
           <label id="ccmc-info-attribution-name" class="text-link" />
           <hbox><image id="ccmc-info-license" /></hbox>
           <button id="ccmc-info-collect-button" label="Collect!" oncommand="ccMediaCollector.collectCurrentPage();" />
+          <progressmeter id="ccmc-info-fetch-progress" hidden="true" mode="undetermined"/>
         </vbox>
       </hbox>
     </panel>

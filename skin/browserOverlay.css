@@ -1,13 +1,18 @@
 #ccmc-info-container {
   padding: 10px;
+  width: 300px;
 }
 
 #ccmc-info-container > vbox {
   padding: 5px;
 }
 #ccmc-info-thumbnail {
-  max-width: 96px;
-  max-height: 64px;
+  -moz-background-size: 75px;
+  background-size: 75px;
+  background-repeat: no-repeat;
+  background-position: center center;
+  width: 75px;
+  height: 75px;
 }
 
 #ccmc-info-license {
