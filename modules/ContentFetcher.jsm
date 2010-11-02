@@ -61,7 +61,7 @@ function setHostFrameReady(event) {
 function initParser(targetUrl, title, callback) {
   /* https://developer.mozilla.org/en/Code_snippets/HTML_to_DOM */
   /* XXX: Create cache for <iframe> elements */
-  var iframe = hostDocument.createElement("iframe"); 
+  var iframe = hostDocument.createElementNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul", "iframe"); 
   iframe.setAttribute("type", "content");
   iframe.setAttribute("collapsed", "true");
   hostDocument.documentElement.appendChild(iframe);
