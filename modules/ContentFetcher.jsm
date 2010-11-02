@@ -46,28 +46,19 @@ function setDefaultDir() {
   return true;
 }
 
-/* During the content fetcher startup, find and set the download target directory. */
-ContentFetcher.startup = function() {
-  if (!setDefaultDir()) {
-    Components.utils.reportError("Unable to set default download directory!");
-  }
+/* Use for <iframe> workers.
+ * Modified from Bug 546740 (http://bugzil.la/546740) patch for Jetpack SDK. */
+var hostFrame, hostDocument, isHostFrameReady = false;
+
+/* When the <html:iframe> ready (see ContentFetcher.startup), set hostDocument and marked it as ready. */
+function setHostFrameReady(event) {
+  hostDocument = hiddenWindow.contentDocument;
+  hostFrame.removeEventListener("DOMContentLoaded", setHostFrameReady, false);  
+  isHostFrameReady = true;
 }
 
-/* Sometimes we need to get "Original Content", which might need another instruction to get */
-ContentFetcher.getOriginalContent = function(url, title, callback) {
-  /* Routine 1: if the url is what we want... undone */
-  /* Routine 2: Use a JS snippet to get the URL we want ... undone */
-  
-  /* Routine 3: Extra URL Fetch and DOM Parsing is needed */
-  /* In the future, we will make every site code to be written as a script, and run it through evalInSandbox. */
-
-  /* Flickr only code. Acesss /sizes/o/ to get the largest size possible to reach. */
-  var originalSizeUrl = url + "/sizes/o/";
-  
-  /* We don't have a document, so borrow from hiddenDOMWindow. */
-  var appShellService = Cc["@mozilla.org/appshell/appShellService;1"].getService(Ci.nsIAppShellService); 
-  var hostDocument = appShellService.hiddenDOMWindow.document;
-  
+/* Set a new <xul:iframe> to parse the item */
+function initParser(targetUrl, title, callback) {
   /* https://developer.mozilla.org/en/Code_snippets/HTML_to_DOM */
   /* XXX: Create cache for <iframe> elements */
   var iframe = hostDocument.createElement("iframe"); 
@@ -84,7 +75,7 @@ ContentFetcher.getOriginalContent = function(url, title, callback) {
   /* Listen to loading */
   iframe.addEventListener("DOMContentLoaded", function(event) { originalContentReceiver.success(event, title, callback); }, false );
   /* Go */
-  iframe.contentDocument.location.href = originalSizeUrl;
+  iframe.contentDocument.location.href = targetUrl;
 };
 
 /* Receive the hidden <iframe> result. Should be done with evalInSandbox scripts in the future. */
@@ -118,3 +109,50 @@ originalContentReceiver.fail = function() {
 var downloadQueue = [
 
 ];
+
+/* Public Methods */
+
+/* During the content fetcher startup, find and set the download target directory. */
+ContentFetcher.startup = function() {
+  if (!setDefaultDir()) {
+    Components.utils.reportError("Unable to set default download directory!");
+  }
+}
+
+/* Sometimes we need to get "Original Content", which might need another instruction to get */
+ContentFetcher.getOriginalContent = function(url, title, callback) {
+  /* Routine 1: if the url is what we want... undone */
+  /* Routine 2: Use a JS snippet to get the URL we want ... undone */
+  /* Routine 3: Extra URL Fetch and DOM Parsing is needed */
+  /* In the future, we will make every site code to be written as a script, and run it through evalInSandbox. */
+
+  /* Flickr only code. Acesss /sizes/o/ to get the largest size possible to reach. */
+  var targetUrl = url + "/sizes/o/";
+  
+  /* In some OS, hidden window is an XHTML/XUL document so we can directly put <xul:iframe> into it.
+   * However if the hidden window a HTML document, we need to append a <html:iframe> with XHTML document, and put <xul:iframe> in XHTML.
+   * Modified from Bug 546740 (http://bugzil.la/546740) patch for Jetpack SDK.
+   */
+  var appShellService = Cc["@mozilla.org/appshell/appShellService;1"].getService(Ci.nsIAppShellService);
+  var hiddenWindow = appShellService.hiddenDOMWindow;
+  if (hiddenWindow.location.protocol == "chrome:" &&
+      (hiddenWindow.document.contentType == "application/vnd.mozilla.xul+xml" ||
+      hiddenWindow.document.contentType == "application/xhtml+xml")) {
+    hostFrame = hiddenWindow;
+    hostDocument = hiddenWindow.document;
+    isHostFrameReady = true;
+  } else {
+    hostFrame = hiddenWindow.document.createElement("iframe");
+    /* Hack because we need chrome:// URL. */
+    hostFrame.setAttribute("src", "chrome://ccmediacollector/content/hiddenWindowContainer.xhtml");
+    hostFrame.addEventListener("DOMContentLoaded", setHostFrameReady, false);
+  }
+  
+  if (isHostFrameReady) {
+    initParser(targetUrl, title, callback);
+  } else {
+    hostFrame.addEventListener("DOMContentLoaded", function() {
+      initParser(targetUrl, title, callback);
+    }, false);
+  }
+};
