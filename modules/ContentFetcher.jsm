@@ -147,7 +147,7 @@ ContentFetcher.getOriginalContent = function(url, title, callback) {
       /* Hack because we need chrome:// URL. */
       hostFrame.setAttribute("src", "chrome://ccmediacollector/content/hiddenWindowContainer.xhtml");
       hostFrame.addEventListener("DOMContentLoaded", setHostFrameReady, false);
-      hiddenWindow.document.appendChild(hostFrame);
+      hiddenWindow.document.body.appendChild(hostFrame);
     }
   }
   if (isHostFrameReady) {
