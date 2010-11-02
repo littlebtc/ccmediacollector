@@ -133,21 +133,23 @@ ContentFetcher.getOriginalContent = function(url, title, callback) {
    * However if the hidden window a HTML document, we need to append a <html:iframe> with XHTML document, and put <xul:iframe> in XHTML.
    * Modified from Bug 546740 (http://bugzil.la/546740) patch for Jetpack SDK.
    */
-  var appShellService = Cc["@mozilla.org/appshell/appShellService;1"].getService(Ci.nsIAppShellService);
-  var hiddenWindow = appShellService.hiddenDOMWindow;
-  if (hiddenWindow.location.protocol == "chrome:" &&
-      (hiddenWindow.document.contentType == "application/vnd.mozilla.xul+xml" ||
-      hiddenWindow.document.contentType == "application/xhtml+xml")) {
-    hostFrame = hiddenWindow;
-    hostDocument = hiddenWindow.document;
-    isHostFrameReady = true;
-  } else {
-    hostFrame = hiddenWindow.document.createElement("iframe");
-    /* Hack because we need chrome:// URL. */
-    hostFrame.setAttribute("src", "chrome://ccmediacollector/content/hiddenWindowContainer.xhtml");
-    hostFrame.addEventListener("DOMContentLoaded", setHostFrameReady, false);
+  if (!hostFrame) {
+    var appShellService = Cc["@mozilla.org/appshell/appShellService;1"].getService(Ci.nsIAppShellService);
+    var hiddenWindow = appShellService.hiddenDOMWindow;
+    if (hiddenWindow.location.protocol == "chrome:" &&
+        (hiddenWindow.document.contentType == "application/vnd.mozilla.xul+xml" ||
+        hiddenWindow.document.contentType == "application/xhtml+xml")) {
+      hostFrame = hiddenWindow;
+      hostDocument = hiddenWindow.document;
+      isHostFrameReady = true;
+    } else {
+      hostFrame = hiddenWindow.document.createElement("iframe");
+      /* Hack because we need chrome:// URL. */
+      hostFrame.setAttribute("src", "chrome://ccmediacollector/content/hiddenWindowContainer.xhtml");
+      hostFrame.addEventListener("DOMContentLoaded", setHostFrameReady, false);
+      hiddenWindow.document.appendChild(hostFrame);
+    }
   }
-  
   if (isHostFrameReady) {
     initParser(targetUrl, title, callback);
   } else {
