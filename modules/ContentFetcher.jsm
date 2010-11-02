@@ -157,6 +157,7 @@ ContentFetcher.getOriginalContent = function(url, title, callback) {
     initParser(targetUrl, title, callback);
   } else {
     hostFrame.addEventListener("DOMContentLoaded", function() {
+      hostFrame.removeEventListener("DOMContentLoaded", arguments.callee, false);
       initParser(targetUrl, title, callback);
     }, false);
   }
