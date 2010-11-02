@@ -48,11 +48,11 @@ function setDefaultDir() {
 
 /* Use for <iframe> workers.
  * Modified from Bug 546740 (http://bugzil.la/546740) patch for Jetpack SDK. */
-var hiddenWindow, hostFrame, hostDocument, isHostFrameReady = false;
+var hostFrame, hostDocument, isHostFrameReady = false;
 
 /* When the <html:iframe> ready (see ContentFetcher.startup), set hostDocument and marked it as ready. */
 function setHostFrameReady(event) {
-  hostDocument = hiddenWindow.contentDocument;
+  hostDocument = hostFrame.contentDocument;
   hostFrame.removeEventListener("DOMContentLoaded", setHostFrameReady, false);  
   isHostFrameReady = true;
 }
@@ -135,7 +135,7 @@ ContentFetcher.getOriginalContent = function(url, title, callback) {
    */
   if (!hostFrame) {
     var appShellService = Cc["@mozilla.org/appshell/appShellService;1"].getService(Ci.nsIAppShellService);
-    hiddenWindow = appShellService.hiddenDOMWindow;
+    var hiddenWindow = appShellService.hiddenDOMWindow;
     if (hiddenWindow.location.protocol == "chrome:" &&
         (hiddenWindow.document.contentType == "application/vnd.mozilla.xul+xml" ||
         hiddenWindow.document.contentType == "application/xhtml+xml")) {
