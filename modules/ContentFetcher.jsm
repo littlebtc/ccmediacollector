@@ -58,7 +58,7 @@ function setHostFrameReady(event) {
 }
 
 /* Set a new <xul:iframe> to parse the item */
-function initParser(targetUrl, title, callback) {
+function initParser(targetUrl, path, title, callback) {
   /* https://developer.mozilla.org/en/Code_snippets/HTML_to_DOM */
   /* XXX: Create cache for <iframe> elements */
   if (!hostDocument) {
@@ -76,14 +76,14 @@ function initParser(targetUrl, title, callback) {
 	iframe.webNavigation.allowPlugins = false;
 	iframe.webNavigation.allowSubframes = false;
   /* Listen to loading */
-  iframe.addEventListener("DOMContentLoaded", function(event) { originalContentReceiver.success(event, title, callback); }, false );
+  iframe.addEventListener("DOMContentLoaded", function(event) { originalContentReceiver.success(event, path, title, callback); }, false );
   /* Go */
   iframe.contentDocument.location.href = targetUrl;
 };
 
 /* Receive the hidden <iframe> result. Should be done with evalInSandbox scripts in the future. */
 let originalContentReceiver = {};
-originalContentReceiver.success = function(event, title, callback) {
+originalContentReceiver.success = function(event, path, title, callback) {
   var document = event.originalTarget;
   if (!document) { return; }
   /* Flickr only */
@@ -96,7 +96,7 @@ originalContentReceiver.success = function(event, title, callback) {
     download.callback = callback;
     /* Set download callback and nice unique filename
      * XXX: File exetensions detection */
-    var file = ContentFetcher.defaultDir.clone();
+    var file = path.clone();
     file.append(title + ".jpg");
     file = DownloadPaths.createNiceUniqueFile(file)
     /* Really initial download. */
@@ -123,9 +123,12 @@ ContentFetcher.startup = function() {
 }
 
 /* Sometimes we need to get "Original Content", which might need another instruction to get */
-ContentFetcher.getOriginalContent = function(url, title, callback) {
+ContentFetcher.getOriginalContent = function(url, path, title, callback) {
+  if (!path instanceof Ci.nsIFile || typeof callback != "function") { return; }
   /* Routine 1: if the url is what we want... undone */
+
   /* Routine 2: Use a JS snippet to get the URL we want ... undone */
+
   /* Routine 3: Extra URL Fetch and DOM Parsing is needed */
   /* In the future, we will make every site code to be written as a script, and run it through evalInSandbox. */
 
@@ -154,11 +157,11 @@ ContentFetcher.getOriginalContent = function(url, title, callback) {
     }
   }
   if (isHostFrameReady) {
-    initParser(targetUrl, title, callback);
+    initParser(targetUrl, path, title, callback);
   } else {
     hostFrame.addEventListener("DOMContentLoaded", function() {
       hostFrame.removeEventListener("DOMContentLoaded", arguments.callee, false);
-      initParser(targetUrl, title, callback);
+      initParser(targetUrl, path, title, callback);
     }, false);
   }
 };

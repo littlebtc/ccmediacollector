@@ -12,14 +12,53 @@ let LibraryPrivate = {};
 
 /* Record these in order to help building SQL strings */
 const dbSchemaString = "(`id` INTEGER PRIMARY KEY NOT NULL, `starred` INTEGER, `type` VARCHAR, `url` VARCHAR, `title` VARCHAR, " +
-                       "`original_title` VARCHAR, `attribution_name` VARCHAR, `attribution_url` VARCHAR, `source` VARCHAR, "+
-                       "`license_url` VARCHAR, `license_nc` BOOLEAN, `license_sa` BOOLEAN, `license_nd` BOOLEAN,"+
-                       "`more_permission_url` VARCHAR, `tags` VARCHAR, `notes` TEXT, `file` VARCHAR, `thumbnail_url` VARCHAR)";
+                       "`original_title` VARCHAR, `attribution_name` VARCHAR, `attribution_url` VARCHAR, `source` VARCHAR, " +
+                       "`license_url` VARCHAR, `license_nc` BOOLEAN, `license_sa` BOOLEAN, `license_nd` BOOLEAN," +
+                       "`more_permission_url` VARCHAR, `tags` VARCHAR, `description` TEXT, `notes` TEXT, `thumbnail_url` VARCHAR," +
+                       "`created_at` INTEGER, `collected_at` INTEGER, `file` VARCHAR, `thumbnail_file` VARCHAR)";
 const dbFields = ["id", "starred", "type", "url", "title", "original_title", "attribution_name", "attribution_url", "source",
-                 "license_url", "license_nc", "license_sa", "license_nd", "more_permission_url", "tags", "notes", "file", "thumbnail_url"];
+                 "license_url", "license_nc", "license_sa", "license_nd", "more_permission_url", "tags", "description", "notes", "thumbnail_url",
+                 "created_at", "collected_at", "file", "thumbnail_file"];
 
 Components.utils.import("resource://ccmediacollector/Services.jsm");
 
+/* Restore the default path (nsIFile) for libraries / fetched content.
+ * XXX: Make it possible to select the path! */
+LibraryPrivate.defaultDir = null;
+
+/* Set default path to Documents/CC Media Collector on multiple platforms. */
+LibraryPrivate.setDefaultDir = function() {
+  var defaultDir = null;
+  Components.utils.import("resource://ccmediacollector/Services.jsm");
+  var os = Services.appinfo.OS;
+  if (os == "WINNT") {
+    defaultDir = Services.dirsvc.get("Pers", Ci.nsILocalFile);
+  } else if (os == "Darwin") {
+    defaultDir = Services.dirsvc.get("UsrDocs", Ci.nsILocalFile);
+  } else {
+    /* If we fail to use XDGDocs, use home directory. */
+    try {
+      defaultDir = Services.dirsvc.get("XDGDocs", Ci.nsILocalFile);
+    } catch(e) {
+      defaultDir = Services.dirsvc.get("Home", Ci.nsILocalFile);
+    }
+  }
+  /* Step 2: Append NicoFox and do some check; create if not exists. */
+  defaultDir.append("CC Media Collector");
+  if (defaultDir.exists()) {
+    if (!defaultDir.isWritable() || !defaultDir.isDirectory()) {
+      return false;
+    }
+  } else {
+    try {
+      defaultDir.create(Ci.nsIFile.DIRECTORY_TYPE, 0755);
+    } catch(e) {
+      return false;
+    }
+  }
+  LibraryPrivate.defaultDir = defaultDir;
+  return true;
+}
 /* Build Library table */
 LibraryPrivate.createTable = function() {
   var statement = this.dbConnection.createStatement("CREATE TABLE IF NOT EXISTS library" + dbSchemaString);
@@ -55,13 +94,13 @@ LibraryPrivate.updateCallback = function(id, info) {
 /* Run ContentFetcher for a specific library item 
  * @param info Object of the item that needs to be fetched.
  */
-LibraryPrivate.exectueFetch = function(info) {
+LibraryPrivate.executeFetch = function(info) {
   Components.utils.import("resource://ccmediacollector/ContentFetcher.jsm");
   /* Create a tiny listener to make fetchCallback receive the callback events with item id. */
   var callback = function(type, value) {
     LibraryPrivate.handleDownloadEvent(info.id, type, value);
   };
-  ContentFetcher.getOriginalContent(info.url, info.title, callback);
+  ContentFetcher.getOriginalContent(info.url, this.defaultDir.clone(), info.title, callback);
 };
 
 /* Handle the DownloadUtils event. */
@@ -145,20 +184,14 @@ function generateStatementCallback(callerName, thisObj, successCallback, failCal
   return callback;  
 }
 
-/* At startup, create database / tables if needed */
+/* Startup: check the folder, add database if needed */
 Library.startup = function() {
-  var file = Services.dirsvc.get("ProfD", Ci.nsIFile);
-  file.append("ccmediacollector");
-  try {
-    if (!file.exists()) {
-      file.create(Ci.nsIFile.DIRECTORY_TYPE, 0755);
-    } else if (!file.isDirectory() || !file.isWritable()) {
-      throw new Error("ccmediacollector must be a writtable directory.");
-    }
-  } catch(e) {
-    Components.utils.reportError("Fail to create directory for ccmediacollector!!");
+  if (!LibraryPrivate.setDefaultDir()) {
+    Components.utils.reportError("Unable to set default download directory!");
     return;
   }
+  /* Check and create database if needed */
+  var file = LibraryPrivate.defaultDir.clone();
   file.append("library.sqlite");
 
   if (!file.exists()) {
@@ -168,24 +201,6 @@ Library.startup = function() {
   } else {
     LibraryPrivate.dbConnection = Services.storage.openDatabase(file);
   }
-
-  /* Create thumbnail cache directory */
-  var file = Services.dirsvc.get("ProfD", Ci.nsIFile);
-  file.append("ccmediacollector");
-  file.append("thumbnailcache");
-  try {
-    if (!file.exists()) {
-      file.create(Ci.nsIFile.DIRECTORY_TYPE, 0755);
-    } else if (!file.isDirectory() || !file.isWritable()) {
-      throw new Error("thumbnailcache must be a writtable directory.");
-    }
-  } catch(e) {
-    Components.utils.reportError("Fail to create directory for ccmediacollector/thumbnailcache!!");
-    return;
-  }
-  /* Startup and set ContentFetcher path */
-  Components.utils.import("resource://ccmediacollector/ContentFetcher.jsm");
-  ContentFetcher.startup();
 };
 
 /* Asynchorouslly get all items */
@@ -224,19 +239,19 @@ Library.add = function(url, info) {
   var lastInsertRowID = LibraryPrivate.dbConnection.lastInsertRowID;
   if (info.thumbnail_url) {
     /* Thumbnail cache, XXX: Should be split out and error-safe */
+    Components.utils.import("resource://ccmediacollector/DownloadPaths.jsm");
     Components.utils.import("resource://ccmediacollector/DownloadUtils.jsm");
-    var file = Services.dirsvc.get("ProfD", Ci.nsIFile);
-    file.append("ccmediacollector");
-    file.append("thumbnailcache");
-    file.append(lastInsertRowID + ".jpg");
+    var file = LibraryPrivate.defaultDir.clone();
+    file.append(info.title + ".thumb.jpg");
+    file = DownloadPaths.createNiceUniqueFile(file)
     var dlInstance = new DownloadUtils();
     dlInstance.callback = function() {};
     dlInstance.init(info.thumbnail_url, file);
-    LibraryPrivate.update(lastInsertRowID, {thumbnail_url: Services.io.newFileURI(file).spec});
+    LibraryPrivate.update(lastInsertRowID, {thumbnail_file: file.path});
   }
   /* Call executeFetch to get original content. XXX: Should we add another addAndFetch function? */
   info.id = lastInsertRowID;
-  LibraryPrivate.exectueFetch(info);
+  LibraryPrivate.executeFetch(info);
   return lastInsertRowID;
 };
 
