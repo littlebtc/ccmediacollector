@@ -14,10 +14,10 @@ let LibraryPrivate = {};
 const dbSchemaString = "(`id` INTEGER PRIMARY KEY NOT NULL, `starred` INTEGER, `type` VARCHAR, `url` VARCHAR, `title` VARCHAR, " +
                        "`original_title` VARCHAR, `attribution_name` VARCHAR, `attribution_url` VARCHAR, `source` VARCHAR, " +
                        "`license_url` VARCHAR, `license_nc` BOOLEAN, `license_sa` BOOLEAN, `license_nd` BOOLEAN," +
-                       "`more_permission_url` VARCHAR, `tags` VARCHAR, `description` TEXT, `notes` TEXT, `thumbnail_url` VARCHAR," +
+                       "`more_permission_url` VARCHAR, `tags` VARCHAR, `description` TEXT, `notes` TEXT, `original_url` VARCHAR, `thumbnail_url` VARCHAR," +
                        "`created_at` INTEGER, `collected_at` INTEGER, `file` VARCHAR, `thumbnail_file` VARCHAR)";
 const dbFields = ["id", "starred", "type", "url", "title", "original_title", "attribution_name", "attribution_url", "source",
-                 "license_url", "license_nc", "license_sa", "license_nd", "more_permission_url", "tags", "description", "notes", "thumbnail_url",
+                 "license_url", "license_nc", "license_sa", "license_nd", "more_permission_url", "tags", "description", "notes", "original_url", "thumbnail_url",
                  "created_at", "collected_at", "file", "thumbnail_file"];
 
 Components.utils.import("resource://ccmediacollector/Services.jsm");
@@ -100,7 +100,7 @@ LibraryPrivate.executeFetch = function(info) {
   var callback = function(type, value) {
     LibraryPrivate.handleDownloadEvent(info.id, type, value);
   };
-  ContentFetcher.getOriginalContent(info.url, this.defaultDir.clone(), info.title, callback);
+  ContentFetcher.getOriginalContent(info, this.defaultDir.clone(), callback);
 };
 
 /* Handle the DownloadUtils event. */
@@ -223,7 +223,7 @@ Library.checkExistence = function(url, thisObj, successCallback) {
 /* Add items into library */
 Library.add = function(url, info) {
 
-  var statement = LibraryPrivate.dbConnection.createStatement("INSERT INTO `library` (`type`, `url`, `title`, `original_title`, `attribution_name`, `attribution_url`, `source`, `license_url`, `license_nc`, `license_sa`, `license_nd`, `more_permission_url`, `thumbnail_url`) VALUES (:type, :url, :original_title, :title, :attribution_name, :attribution_url, :source, :license_url, :license_nc, :license_sa, :license_nd, :more_permission_url, :thumbnail_url)");
+  var statement = LibraryPrivate.dbConnection.createStatement("INSERT INTO `library` (`type`, `url`, `title`, `original_title`, `attribution_name`, `attribution_url`, `source`, `license_url`, `license_nc`, `license_sa`, `license_nd`, `more_permission_url`, `original_url`, `thumbnail_url`) VALUES (:type, :url, :original_title, :title, :attribution_name, :attribution_url, :source, :license_url, :license_nc, :license_sa, :license_nd, :more_permission_url, :original_url, :thumbnail_url)");
   statement.params["url"] = url;
   /* Fill license information if needed */
   if (info.license_url && info.license_url.search(/creativecommons/) != -1) {

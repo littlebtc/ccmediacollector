@@ -13,6 +13,10 @@ ContentSniffer._supported = [
   {
     regex: /^http\:\/\/www\.flickr\.com\/photos\/[^\/]+\/[0-9]+/,
     file: "flickr.js"
+  },
+  {
+    regex: /^http\:\/\/(?:www\.)?vimeo\.com\/[0-9]+$/,
+    file: "vimeo.js"
   }
 ];
 
@@ -24,14 +28,12 @@ ContentSniffer.readFromPage = function(document) {
   var count = ContentSniffer._supported.length;
   for (var i = 0; i < count; i++) {
     if (document.location.href.search(this._supported[i].regex) != -1) {
-      if(1/*Flickr code */) {
-        /* Clean URL */
+      if(i == 0) { /* Flickr-related code */
         var url = document.location.href;
         /* Avoid /sizes/ pages */
         if (url.search(/sizes/) != -1) { return; }
-        /* Trailing slash */
+        /* Cleaning URL: Remove trailing slash, filter out /in/xxxx URLs. */
         if (url.search(/\/$/) == -1) { url += "/"; }
-        /* Filter /in/xxxx URLs */
         url = url.replace(/(^http\:\/\/www\.flickr\.com\/photos\/[^\/]+\/[0-9]+\/)(.*)$/, "$1");
 
         /* Fetch the license */
@@ -58,7 +60,33 @@ ContentSniffer.readFromPage = function(document) {
         
         var thumbnailNode = document.querySelector("link[rel='image_src']");
         var thumbnail = thumbnailNode.href;
-        return { url: url, license_url: license, title: title, original_title: title, attribution_name: attributionName, attribution_url: attributionUrl, thumbnail_url: thumbnail};
+
+        return { url: url, license_url: license, title: title, original_title: title, attribution_name: attributionName, attribution_url: attributionUrl, original_url: null, thumbnail_url: thumbnail};
+      } else if (i == 1) { /* Vimeo-related code */
+        var url = document.location.href;
+        
+        /* Check if we can fetch the license *AND* download the video. 
+           (So user may need to have an account to get the video.) */
+        var licenseNode = document.querySelector("a[href^='http://creativecommons.org/licenses']");
+        var downloadNode = document.querySelector(".download > a[href^='/download']");
+
+        if (!licenseNode || !downloadNode) { return; }
+        var license = licenseNode.href;
+        /* Fetch other information */
+        var attributionNode = document.querySelector(".byline > a");
+        var attributionName = attributionNode.textContent;
+        var attributionUrl = attributionNode.href;
+         
+        var titleNode = document.querySelector("div.title");
+        var title = titleNode.textContent;
+
+        /* Get thumbnail in a very bad way (not using API) */
+        var thumbnailNode = document.querySelector("#brozar_current_clip img");
+        var thumbnail = thumbnailNode.src;
+
+        /* Get original video URL */
+        var original_url = downloadNode.href;
+        return { url: url, license_url: license, title: title, original_title: title, attribution_name: attributionName, attribution_url: attributionUrl, original_url: original_url, thumbnail_url: thumbnail};
       }
     }
   }

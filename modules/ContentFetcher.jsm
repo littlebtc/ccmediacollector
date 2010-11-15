@@ -89,24 +89,22 @@ originalContentReceiver.success = function(event, path, title, callback) {
   /* Flickr only */
   var fetchUrl = document.querySelector("#allsizes-photo img").src;
   if (fetchUrl && /http\:\/\//.test(fetchUrl)) {
-    Components.utils.import("resource://ccmediacollector/DownloadPaths.jsm");
-    Components.utils.import("resource://ccmediacollector/DownloadUtils.jsm");
-    /* Initial DownloadUtils to fetch the content. */
-    var download = new DownloadUtils();
-    download.callback = callback;
-    /* Set download callback and nice unique filename
-     * XXX: File exetensions detection */
-    var file = path.clone();
-    file.append(title + ".jpg");
-    file = DownloadPaths.createNiceUniqueFile(file)
-    /* Really initial download. */
-    download.init(fetchUrl, file);
+    initDownload(fetchUrl, path, title, callback);
   }
 };
 
 originalContentReceiver.fail = function() {
   Components.utils.reportError("Unable to reach original content URL!");
 };
+
+/* Really initialize download. */
+function initDownload(fetchUrl, path, title, callback) {
+  Components.utils.import("resource://ccmediacollector/DownloadUtils.jsm");
+  /* Initial DownloadUtils to fetch the content. */
+  var download = new DownloadUtils();
+  download.callback = callback;
+  download.init(fetchUrl, path, title);
+}
 
 /* The Download Queue, will record items waiting to be downloaded. Currently not used.*/
 var downloadQueue = [
@@ -123,45 +121,47 @@ ContentFetcher.startup = function() {
 }
 
 /* Sometimes we need to get "Original Content", which might need another instruction to get */
-ContentFetcher.getOriginalContent = function(url, path, title, callback) {
+ContentFetcher.getOriginalContent = function(info, path, callback) {
   if (!path instanceof Ci.nsIFile || typeof callback != "function") { return; }
-  /* Routine 1: if the url is what we want... undone */
-
-  /* Routine 2: Use a JS snippet to get the URL we want ... undone */
-
-  /* Routine 3: Extra URL Fetch and DOM Parsing is needed */
-  /* In the future, we will make every site code to be written as a script, and run it through evalInSandbox. */
-
-  /* Flickr only code. Acesss /sizes/o/ to get the largest size possible to reach. */
-  var targetUrl = url + "/sizes/o/";
-  
-  /* In some OS, hidden window is an XHTML/XUL document so we can directly put <xul:iframe> into it.
-   * However if the hidden window a HTML document, we need to append a <html:iframe> with XHTML document, and put <xul:iframe> in XHTML.
-   * Modified from Bug 546740 (http://bugzil.la/546740) patch for Jetpack SDK.
-   */
-  if (!hostFrame) {
-    var appShellService = Cc["@mozilla.org/appshell/appShellService;1"].getService(Ci.nsIAppShellService);
-    var hiddenWindow = appShellService.hiddenDOMWindow;
-    if (hiddenWindow.location.protocol == "chrome:" &&
-        (hiddenWindow.document.contentType == "application/vnd.mozilla.xul+xml" ||
-        hiddenWindow.document.contentType == "application/xhtml+xml")) {
-      hostFrame = hiddenWindow;
-      hostDocument = hiddenWindow.document;
-      isHostFrameReady = true;
-    } else {
-      hostFrame = hiddenWindow.document.createElement("iframe");
-      /* Hack because we need chrome:// URL. */
-      hostFrame.setAttribute("src", "chrome://ccmediacollector/content/hiddenWindowContainer.xhtml");
-      hostFrame.addEventListener("DOMContentLoaded", setHostFrameReady, false);
-      hiddenWindow.document.body.appendChild(hostFrame);
-    }
-  }
-  if (isHostFrameReady) {
-    initParser(targetUrl, path, title, callback);
+  var url = info.url;
+  var title = info.title;
+  /* If we already know the original url, get it. */
+  if (info.original_url) {
+    initDownload(info.original_url, path, title, callback);
   } else {
-    hostFrame.addEventListener("DOMContentLoaded", function() {
-      hostFrame.removeEventListener("DOMContentLoaded", arguments.callee, false);
+    /* Extra URL Fetch and DOM Parsing is needed */
+    /* In the future, we will make every site code to be written as a script, and run it through evalInSandbox. */
+    /* Flickr only code. Acesss /sizes/o/ to get the largest size possible to reach. */
+    var targetUrl = url + "/sizes/o/";
+  
+    /* In some OS, hidden window is an XHTML/XUL document so we can directly put <xul:iframe> into it.
+     * However if the hidden window a HTML document, we need to append a <html:iframe> with XHTML document, and put <xul:iframe> in XHTML.
+     * Modified from Bug 546740 (http://bugzil.la/546740) patch for Jetpack SDK.
+     */
+    if (!hostFrame) {
+      var appShellService = Cc["@mozilla.org/appshell/appShellService;1"].getService(Ci.nsIAppShellService);
+      var hiddenWindow = appShellService.hiddenDOMWindow;
+      if (hiddenWindow.location.protocol == "chrome:" &&
+          (hiddenWindow.document.contentType == "application/vnd.mozilla.xul+xml" ||
+          hiddenWindow.document.contentType == "application/xhtml+xml")) {
+        hostFrame = hiddenWindow;
+        hostDocument = hiddenWindow.document;
+        isHostFrameReady = true;
+      } else {
+        hostFrame = hiddenWindow.document.createElement("iframe");
+        /* Hack because we need chrome:// URL. */
+        hostFrame.setAttribute("src", "chrome://ccmediacollector/content/hiddenWindowContainer.xhtml");
+        hostFrame.addEventListener("DOMContentLoaded", setHostFrameReady, false);
+        hiddenWindow.document.body.appendChild(hostFrame);
+      }
+    }
+    if (isHostFrameReady) {
       initParser(targetUrl, path, title, callback);
-    }, false);
+    } else {
+      hostFrame.addEventListener("DOMContentLoaded", function() {
+        hostFrame.removeEventListener("DOMContentLoaded", arguments.callee, false);
+        initParser(targetUrl, path, title, callback);
+      }, false);
+    }
   }
 };

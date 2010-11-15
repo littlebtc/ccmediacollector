@@ -14,8 +14,10 @@ Components.utils.import("resource://ccmediacollector/Services.jsm");
 
 let DownloadUtils = function() { };
 DownloadUtils.prototype = {
-  /* Store the file instance */
+  /* Store the file instance and the title */
   _file: null,
+  _title: null,
+  _fileType: null,
   /* Is the download canceled? */
   _canceled: false,
   
@@ -27,8 +29,16 @@ DownloadUtils.prototype = {
   dbId: null,
   
   /* Initialize download for specific URL. */
-  init: function(url, file) {
-    this._file = file;
+  init: function(url, path, title) {
+    /* Temp workaround: if title is set, it means we didn't know the actual fileType.
+       As we didn't recognize file type at this time, set the extension to be .part */
+    this._file = path.clone();
+    if (typeof title != "undefined") {
+      this._file.append(title + ".part");
+      this._file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0600);
+      /* Save the title for future use. */
+      this._title = title;
+    }
     /* Don't waste time */
     if (this._canceled) { return; }
     
@@ -50,10 +60,23 @@ DownloadUtils.prototype = {
       onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {
         if (this._parentInstance._canceled) { return; }
         if (aStateFlags & 1) {
-         /* Process HTTP Errors
-	        * nsIChannel will throw NS_ERROR_NOT_AVAILABLE when there is no connection
-          * (even for requestSucceeded), so use the try-catch way  */
+          /* Get HTTP Channel. */
           var channel = aRequest.QueryInterface(Ci.nsIHttpChannel);
+
+          /* Try to find the correct file type if we are unsure. */
+          if (this._parentInstance._title) {
+            var newUrl = channel.URI.spec;
+            newUrl = newUrl.replace(/\?.*$/, "");
+            var fileTypeMatch = /\.([0-9a-z]{1,4})$/i.exec(newUrl);
+            if (fileTypeMatch) {
+              this._parentInstance._fileType = fileTypeMatch[1].toLowerCase();
+            } else {
+              this._parentInstance._fileType = "htm";
+            }
+          }
+          /* Process HTTP Errors
+	         * nsIChannel will throw NS_ERROR_NOT_AVAILABLE when there is no connection
+           * (even for requestSucceeded), so use the try-catch way  */
           try {
             if (channel.responseStatus != 200) {
               Components.utils.reportError("Hit 403!");
@@ -105,7 +128,18 @@ DownloadUtils.prototype = {
     this.callback("fail", {});
   },
   completeAll: function() {
-    /* When completed, return the nsIFile instance to make Library.jsm record the file name. */
+    /* Set the file type and final file name. from DownloadPaths.jsm (temp workaround) */
+    /* XXX: Should find a better way to handle conflict */
+    if (this._title) {
+      var curFile = this._file.clone();
+      var ext = "." + this._fileType;
+      curFile.leafName = this._title + ext;
+      for (let i = 1; i < 10000 && curFile.exists(); i++) {
+        curFile.leafName = this._title + "(" + i + ")" + ext;
+      }
+      this._file.moveTo(null, curFile.leafName);
+    }
+    /* Return the nsIFile instance to make Library.jsm record the file name. */
     this.callback("completed", this._file);
   },
   /* Cancel by download manager action */
