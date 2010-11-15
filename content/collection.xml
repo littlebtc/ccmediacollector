@@ -16,7 +16,7 @@
     </content>
     <implementation>
       <property name="thumbnail"
-          onset="document.getAnonymousElementByAttribute(this, 'anonid', 'thumbnail').style.backgroundImage = 'url(' + val + ')';"/>-->
+          onset="document.getAnonymousElementByAttribute(this, 'anonid', 'thumbnail').style.backgroundImage = 'url(\'' + val + '\')';"/>-->
     </implementation>
   </binding>
 </bindings>

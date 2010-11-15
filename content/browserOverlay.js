@@ -116,7 +116,7 @@ ccMediaCollector.fillPanelInfo = function(anchor) {
       }
     }
     if (info.thumbnail_url) {
-      document.getElementById("ccmc-info-thumbnail").style.backgroundImage = "url(" + info.thumbnail_url + ")";
+      document.getElementById("ccmc-info-thumbnail").style.backgroundImage = "url('" + info.thumbnail_url + "')";
     }
     this.Library.checkExistence(info.url, ccMediaCollector, "updateExistence");
   }

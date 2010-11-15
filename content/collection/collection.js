@@ -41,7 +41,13 @@ collection.showItems = function(argsArray) {
       item.setAttribute("file", argsArray[i].file);
     }
     list.appendChild(item);
-    item.thumbnail = argsArray[i].thumbnail_url;
+    /* Get thumbnail from local or remote site */
+    if (argsArray[i].thumbnail_file) {
+      var thumbnailFile = collection._fileInstance(argsArray[i].thumbnail_file);
+      item.thumbnail = this.Services.io.newFileURI(thumbnailFile).spec;
+    } else if (argsArray[i].thumbnail_url) {
+      item.thumbnail = argsArray[i].thumbnail_url;
+    }
   }
 };
 collection.dbError = function() {
