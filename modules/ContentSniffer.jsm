@@ -67,7 +67,7 @@ ContentSniffer.readFromPage = function(document) {
         
         /* Check if we can fetch the license *AND* download the video. 
            (So user may need to have an account to get the video.) */
-        var licenseNode = document.querySelector("a[href^='http://creativecommons.org/licenses']");
+        var licenseNode = document.querySelector(".vid_info a[href^='http://creativecommons.org/licenses']");
         var downloadNode = document.querySelector(".download > a[href^='/download']");
 
         if (!licenseNode || !downloadNode) { return; }
