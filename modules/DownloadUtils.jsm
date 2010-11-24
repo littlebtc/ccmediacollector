@@ -65,13 +65,24 @@ DownloadUtils.prototype = {
 
           /* Try to find the correct file type if we are unsure. */
           if (this._parentInstance._title) {
-            var newUrl = channel.URI.spec;
-            newUrl = newUrl.replace(/\?.*$/, "");
-            var fileTypeMatch = /\.([0-9a-z]{1,4})$/i.exec(newUrl);
-            if (fileTypeMatch) {
-              this._parentInstance._fileType = fileTypeMatch[1].toLowerCase();
+            /* Set default file extension to HTML. */
+            this._parentInstance._fileType = "htm";
+            /* Use Content-Disposition if available */
+            var contentDisposition = channel.getResponseHeader("Content-Disposition");
+            if (contentDisposition) {
+              /* Try to find filename="xxx.mp3" prt */
+              var fileTypeMatch = /\.([0-9a-z]{1,4})\"?;?/i.exec(contentDisposition);
+              if (fileTypeMatch) {
+                this._parentInstance._fileType = fileTypeMatch[1].toLowerCase();
+              }
             } else {
-              this._parentInstance._fileType = "htm";
+              /* Then try to sniff URL */
+              var newUrl = channel.URI.spec;
+              newUrl = newUrl.replace(/\?.*$/, "");
+              var fileTypeMatch = /\.([0-9a-z]{1,4})$/i.exec(newUrl);
+              if (fileTypeMatch) {
+                this._parentInstance._fileType = fileTypeMatch[1].toLowerCase();
+              }
             }
           }
           /* Process HTTP Errors
