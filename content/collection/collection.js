@@ -53,6 +53,34 @@ collection.showItems = function(argsArray) {
 collection.dbError = function() {
   alert("Collection DB Error!");
 };
+
+/* A very simple "Search" feature implemented by hidding elements. 
+   Mostly modified from chrome/toolkit/content/mozapps/downloads/downloads.js on mozilla-central.
+ */
+collection.search = function(value) {
+  var list = document.getElementById("collectionList");
+  var items = list.children;
+  /* Split search terms and set search attributes. */
+  var terms = value.replace(/^\s+|\s+$/g, "").toLowerCase().split(/\s+/);
+  var searchAttributes = ["title", "original_title", "url", "attribution_name", "attribution_url"];
+
+  for (var i = 0; i < items.length; i++) {
+    var item = items[i];
+    var searchKeyword = "";
+    for (var j = 0; j < searchAttributes.length; j++) {
+      searchKeyword += item.getAttribute(searchAttributes[j]).toLowerCase() + " ";
+    }
+    /* Check whether all keywords matched */
+    let match = true;
+    for (var j = 0; j < terms.length; j++) {
+      if (searchKeyword.indexOf(terms[j]) == -1) {
+        match = false;
+      }
+    }
+    item.hidden = !match;
+  }
+};
+
 collection.onItemSelected = function(obj) {
   /* Update the information <groupbox> */
   var item = obj.selectedItem;

@@ -29,9 +29,12 @@
         oncommand= "collection.removeItem();"/>
     </menupopup>
   </popupset>
-  
-  <hbox flex="1">
-   <!--
+  <vbox flex="1">
+    <hbox>
+      <textbox type="search" emptytext="Search" oncommand="collection.search(this.value);"/>
+    </hbox>
+    <hbox flex="1">
+      <!--
     <tree id="collectionTree"
           rows="2"
           width="200"
@@ -40,7 +43,7 @@
       <treecols>
         <treecol anonid="title" flex="1" primary="true" hideheader="true"/>
       </treecols>
-      
+
       <treechildren flex="1">
         <treeitem>
           <treerow>
@@ -57,7 +60,7 @@
     -->
     <richlistbox id="collectionList" height="300" flex="1" onselect="collection.onItemSelected(this);" context="libraryItemPopup">
     </richlistbox>
-    <groupbox>
+    <groupbox width="375">
       <caption label="Media Information" />
       <grid>
         <columns>
@@ -67,32 +70,31 @@
         <rows>
           <row>
             <label value="URL:" />
-            <label id="mediaInfoURL" class="text-link" onclick="if (this.value) collection.openURL(this.value);"/>
-         </row>
-         <row>
-           <label value="Title:" />
-           <textbox id="mediaInfoTitle" />
-         </row>
-         <row>
-           <label value="Original Title:" />
-           <label id="mediaInfoOriginalTitle"/>
-         </row>
-         <row>
-           <label value="Author:" />
-           <textbox id="mediaInfoAttributionName" disabled="true" />
-         </row>
-         <row>
-           <label value="Attribution URL:" />
-           <textbox id="mediaInfoAttributionURL" disabled="true" />
-         </row>
-         <row>
-           <label value="License:" />
-           <hbox>
-             <image id="mediaInfoLicenseImage" />
-             <!--label id="mediaInfoLicenseEdit" value="Edit" class="text-link" />-->
-           </hbox>
-         </row>
-       </rows>
+            <label id="mediaInfoURL" class="text-link" onclick="if (this.value) collection.openURL(this.value);" crop="end"/>
+          </row>
+          <row>
+            <label value="Title:" />
+            <textbox id="mediaInfoTitle" />
+          </row>
+          <row>
+            <label value="Original Title:" />
+            <textbox id="mediaInfoOriginalTitle" disabled="true"/>
+          </row>
+          <row>
+            <label value="Author:" />
+            <textbox id="mediaInfoAttributionName" disabled="true" />
+          </row>
+          <row>
+            <label value="Attribution URL:" />
+            <textbox id="mediaInfoAttributionURL" disabled="true" />
+          </row>
+          <row>
+            <label value="License:" />
+            <hbox>
+              <image id="mediaInfoLicenseImage" />
+            </hbox>
+          </row>
+        </rows>
       </grid>
       <hbox>
         <button label="Change" oncommand="collection.changeItem();"/>
@@ -102,4 +104,5 @@
       </hbox>
     </groupbox>
   </hbox>
+</vbox>
 </page>
