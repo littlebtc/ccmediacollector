@@ -65,7 +65,7 @@ ContentSniffer.readFromPage = function(document) {
         var thumbnailNode = document.querySelector("link[rel='image_src']");
         var thumbnail = thumbnailNode.href;
 
-        return { url: url, license_url: license, title: title, original_title: title, attribution_name: attributionName, attribution_url: attributionUrl, original_url: null, thumbnail_url: thumbnail};
+        return { url: url, license_url: license, title: title, original_title: title, attribution_name: attributionName, attribution_url: attributionUrl, original_url: null, thumbnail_url: thumbnail, type:"dcmitype:StillImage"};
       } else if (i == 1) { /* Vimeo-related code */
         var url = document.location.href;
         
@@ -90,7 +90,7 @@ ContentSniffer.readFromPage = function(document) {
 
         /* Get original video URL */
         var original_url = downloadNode.href;
-        return { url: url, license_url: license, title: title, original_title: title, attribution_name: attributionName, attribution_url: attributionUrl, original_url: original_url, thumbnail_url: thumbnail};
+        return { url: url, license_url: license, title: title, original_title: title, attribution_name: attributionName, attribution_url: attributionUrl, original_url: original_url, thumbnail_url: thumbnail, type:"dcmitype:MovingImage"};
       } else if (i == 2) { /* SoundCloud code */
         var url = document.location.href;
         /* Don't do anything if it is not a track. */
@@ -121,7 +121,7 @@ ContentSniffer.readFromPage = function(document) {
         }
         /* Get original video URL */
         var original_url = downloadNode.href;
-        return { url: url, license_url: license, title: title, original_title: title, attribution_name: attributionName, attribution_url: attributionUrl, original_url: original_url, thumbnail_url: thumbnail};
+        return { url: url, license_url: license, title: title, original_title: title, attribution_name: attributionName, attribution_url: attributionUrl, original_url: original_url, thumbnail_url: thumbnail, type:"dcmitype:Sound"};
         
       }
     }
