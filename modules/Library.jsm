@@ -124,6 +124,40 @@ LibraryPrivate.handleDownloadEvent = function(id, type, value) {
     break;
   }
 };
+/* Parse the items to CCREL meanful XHTML using E4X */
+LibraryPrivate.parseAndExportItemsToXHTML = function(items) {
+  var xhtml = <html xmlns="http://www.w3.org/1999/xhtml" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <head>
+    <title>CC Media Collector</title>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <h1>Collected Items in CC Media Collector</h1>
+    <div id="collectorItems">
+    {function() {
+      var resultXHTML = <></>;
+      for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        /* Try to match the License name and the version */
+        var licenseNameParts = ["Attribution"];
+        if (item.license_nc) { licenseNameParts.push("NonCommercial"); }
+        if (item.license_sa) { licenseNameParts.push("ShareAlike"); }
+        if (item.license_nd) { licenseNameParts.push("NoDerivs"); }
+        var licenseNamePart = licenseNameParts.join("-");
+        var versionMatch = item.license_url.match(/(\/[0-9]+\.[0-9+]\/)/);
+        if (versionMatch) licenseNamePart = versionMatch[1];
+        resultXHTML += <div class="item">
+        <h3 property="dc:title">{item.title}</h3>
+        <p>by <a href="{item.attribution_url}" rel="cc:attributionURL">{item.attribution_name}</a>, license under <a href="{item.license_url}">Creative Commons {licenseNamePart}</a></p>
+        </div>;
+      }
+      return resultXHTML;
+    }()}
+    </div>
+  </body>
+  </html>;
+  Components.utils.reportError(xhtml.toXMLString());
+}
 
 LibraryPrivate.finishStartup = function() {
 };
@@ -279,14 +313,8 @@ Library.remove = function(id) {
   var innerCallback = {
    successCallback: function() { 
      triggerListeners("remove", id, null);
-     /* Remove thumbnail cache if needed */
-     var file = Services.dirsvc.get("ProfD", Ci.nsIFile);
-     file.append("ccmediacollector");
-     file.append("thumbnailcache");
-     file.append(id + ".jpg");
-     if (file.exists()) {
-       file.remove(false);
-     }
+     /* Remove related files if needed */
+
    },
    failCallback: function() { /* Do nothing */ }
   };
@@ -299,6 +327,10 @@ Library.update = function(id, params) {
   LibraryPrivate.update(id, {title: params['title']});
 };
 
+Library.exportToXHTML = function() {
+  /* First get all items in the library. */
+  this.getAll(LibraryPrivate, "parseAndExportItemsToXHTML", "dbFail");  
+};
 
 /* Make other instances listens to the changes to the library. */
 let libraryListeners = [];
