@@ -132,6 +132,40 @@ LibraryPrivate.parseAndExportItemsToXHTML = function(items) {
   <head>
     <title>CC Media Collector</title>
     <meta charset="UTF-8" />
+    <style type="text/css">
+      <![CDATA[
+        h1 {
+          font-size: 150%;
+        }
+        h3 {
+          font-size: 120%;
+          margin: 0;
+          padding: 0;
+        }
+        .item {
+          border-top: 1px dotted;
+          padding-top: 0.5em;
+        }
+        .thumbnail {
+          max-width: 7em;
+          max-height: 7em;
+          height: 5em;
+          margin-bottom: 0.5em;
+          float: left;
+        }
+        .itemInfo {
+          float: left;
+          margin: 0.3em 0 0 0.3em;
+        }
+        .itemContent {
+          padding: 0.5em 0 1em 0;
+          clear: both;
+        }
+        .itemContent > img {
+          max-width: 80%;
+        }
+      ]]>
+    </style>
   </head>
   <body>
     <h1>Collected Items in CC Media Collector</h1>
@@ -147,7 +181,7 @@ LibraryPrivate.parseAndExportItemsToXHTML = function(items) {
         if (item.license_nd) { licenseNameParts.push("NoDerivs"); }
         var licenseNamePart = licenseNameParts.join("-");
         var versionMatch = item.license_url.match(/\/([0-9]+\.[0-9+])\//);
-        if (versionMatch) licenseNamePart += versionMatch[1];
+        if (versionMatch) licenseNamePart += " " + versionMatch[1];
         /* Add thumbnail to XHTML if needed. XXX: Is there any metadata vocabulary to meet it? */
         var thumbnailXHTML = <></>
         if (item.thumbnail_file) {
@@ -166,23 +200,24 @@ LibraryPrivate.parseAndExportItemsToXHTML = function(items) {
           case "dcmitype:Sound":
             dcType = "http://purl.org/dc/dcmitype/Sound";
             dcTypeName = "Audio";
-            contentXHTML = <audio src={fileUrl} autoplay="false" />;
+            contentXHTML = <audio src={fileUrl} controls="controls"/>;
             break;
           case "dcmitype:StillImage":
             dcType = "http://purl.org/dc/dcmitype/StillImage";
             dcTypeName = "Image";
-            contentXHTML = <img src={fileUrl} />;
+            contentXHTML = <img src={fileUrl}/>;
             break;
           case "dcmitype:MovingImage":
             dcType = "http://purl.org/dc/dcmitype/MovingImage";
             dcTypeName = "Video";
-            contentXHTML = <video src={fileUrl} autoplay="false" />;
+            contentXHTML = <video src={fileUrl} controls="controls"/>;
             break;
         }
         resultXHTML += <div class="item">{thumbnailXHTML}
-        <span property="dc:type" href={dcType}>{dcTypeName}</span>
-        <h3 property="dc:title">{item.title}</h3>
-        <p>by <a href={item.attribution_url} rel="cc:attributionURL">{item.attribution_name}</a>, license under <a href={item.license_url}>Creative Commons {licenseNamePart}</a></p>
+        <div class="itemInfo">
+          <h3 property="dc:title">{item.title}</h3>
+          <p><span property="dc:type" href={dcType}>{dcTypeName}</span> by <a href={item.attribution_url} rel="cc:attributionURL">{item.attribution_name}</a>, licensed under <a href={item.license_url}>Creative Commons {licenseNamePart}</a></p>
+        </div>
         <div class="itemContent">
         {contentXHTML}
         </div>
@@ -193,7 +228,20 @@ LibraryPrivate.parseAndExportItemsToXHTML = function(items) {
     </div>
   </body>
   </html>;
-  Components.utils.reportError(xhtml.toXMLString());
+  /* Write in into XHTML */
+  var outputFile = LibraryPrivate.defaultDir.clone();
+  outputFile.append("Library.xhtml");
+  var foStream = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
+  foStream.init(outputFile, 0x02 | 0x08 | 0x20, 0755, 0);
+  /* Convert string to input stream, then use asyncCopy
+     https://developer.mozilla.org/en/writing_textual_data */
+  var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);  
+  converter.charset = "UTF-8";
+  var iStream = converter.convertToInputStream("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
+                                              "<!DOCTYPE html>\n" + xhtml.toXMLString());  
+  
+  Components.utils.import("resource://gre/modules/NetUtil.jsm");
+  NetUtil.asyncCopy(iStream, foStream);  
 }
 
 LibraryPrivate.finishStartup = function() {
