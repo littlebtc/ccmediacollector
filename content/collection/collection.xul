@@ -31,7 +31,32 @@
   </popupset>
   <vbox flex="1">
     <hbox>
-      <textbox type="search" emptytext="Search" oncommand="collection.search(this.value);"/>
+      <textbox type="search" emptytext="Search" oncommand="collection.search();" id="searchText" size="50"/>
+    </hbox>
+    <hbox align="center">
+      <label value="Type:" />
+      <button label="Images, Audios, Videos" id="typeMenuButton" type="menu">
+        <menupopup>
+          <menuitem id="typeMenuImage" type="checkbox" label="Images" checked="true" oncommand="collection.search();"/>
+          <menuitem id="typeMenuAudio" type="checkbox" label="Audios" checked="true" oncommand="collection.search();"/>
+          <menuitem id="typeMenuVideo" type="checkbox" label="Videos" checked="true" oncommand="collection.search();"/>
+        </menupopup>
+      </button>
+      <label value="Permission:" />
+      <button id="permissionMenuButton" label="Not Filtered" type="menu">
+        <menupopup>
+          <menuitem disabled="true" label="Commercial uses" />
+          <menuitem id="permissionMenuCommercialNotFiltered" type="radio" name="permissionMenuCommercial" label="Not Filtered" checked="true" oncommand="collection.search();"/>
+          <menuitem id="permissionMenuCommercialAllowed" type="radio" name="permissionMenuCommercial" label="Commercial Uses Allowed" oncommand="collection.search();"/>
+          <menuitem id="permissionMenuCommercialDenied" type="radio" name="permissionMenuCommercial" label="Commercial Uses Denied" oncommand="collection.search();"/>
+          <menuseparator />
+          <menuitem disabled="true" label="Modifications" />
+          <menuitem id="permissionMenuModificationNotFiltered" type="radio" name="permissionMenuModification" label="Not Filtered" checked="true" oncommand="collection.search();"/>
+          <menuitem id="permissionMenuModificationAllowed" type="radio" name="permissionMenuModification" label="Modifications Allowed, Whether or Not Others Share Alike" oncommand="collection.search();"/>
+          <menuitem id="permissionMenuModificationShareAlike" type="radio" name="permissionMenuModification" label="Modifications Allowed, If Others Share Alike" oncommand="collection.search();"/>
+          <menuitem id="permissionMenuModificationDenied" type="radio" name="permissionMenuModification" label="Modifications Denied" oncommand="collection.search();"/>
+        </menupopup>
+      </button>
     </hbox>
     <hbox flex="1">
       <!--

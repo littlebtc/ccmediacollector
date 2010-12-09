@@ -23,6 +23,7 @@ collection.showItems = function(argsArray) {
   for (var i = 0; i < argsArray.length; i++) {
     var item = document.createElement("richlistitem");
     item.setAttribute("ccmcid", argsArray[i].id);
+    item.setAttribute("ccmctype", argsArray[i].type);
     item.setAttribute("title", argsArray[i].title);
     item.setAttribute("original_title", argsArray[i].original_title);
     item.setAttribute("url", argsArray[i].url);
@@ -33,6 +34,7 @@ collection.showItems = function(argsArray) {
       item.setAttribute("license_url", argsArray[i].license_url);
       var licensePart = argsArray[i].license_url.match(/\/(by[a-z\-]*)\//);
       if (licensePart) {
+        item.setAttribute("license_part", licensePart[1]);
         var license = document.createElement("image");
         item.setAttribute("licensethumbnail", "http://i.creativecommons.org/l/"+ licensePart[1] +"/3.0/80x15.png");
       }
@@ -54,10 +56,11 @@ collection.dbError = function() {
   alert("Collection DB Error!");
 };
 
-/* A very simple "Search" feature implemented by hidding elements. 
+/* A very simple search and filtering feature implemented by hidding elements. 
    Mostly modified from chrome/toolkit/content/mozapps/downloads/downloads.js on mozilla-central.
  */
-collection.search = function(value) {
+collection.search = function() {
+  var value = document.getElementById("searchText").value;
   var list = document.getElementById("collectionList");
   var items = list.children;
   /* Split search terms and set search attributes. */
@@ -77,7 +80,46 @@ collection.search = function(value) {
         match = false;
       }
     }
-    item.hidden = !match;
+    /* Filter the item */
+    if (match) {
+      var type = item.getAttribute("ccmctype");
+      var licensePart = item.getAttribute("license_part");
+      var filterMatch = false;
+      if ((
+           (document.getElementById("typeMenuImage").getAttribute("checked") && type == "dcmitype:StillImage") ||
+           (document.getElementById("typeMenuAudio").getAttribute("checked") && type == "dcmitype:Sound") ||
+           (document.getElementById("typeMenuVideo").getAttribute("checked") && type == "dcmitype:MovingImage")
+          ) && (
+           (document.getElementById("permissionMenuModificationNotFiltered").getAttribute("checked")) ||
+           (document.getElementById("permissionMenuModificationAllowed").getAttribute("checked") && !/(?:sa|nd)/.test(licensePart)) ||
+           (document.getElementById("permissionMenuModificationShareAlike").getAttribute("checked") && /sa/.test(licensePart)) ||
+           (document.getElementById("permissionMenuModificationDenied").getAttribute("checked") && /nd/.test(licensePart))
+          ) && (
+           (document.getElementById("permissionMenuCommercialNotFiltered").getAttribute("checked")) ||
+           (document.getElementById("permissionMenuCommercialAllowed").getAttribute("checked") && !/nc/.test(licensePart)) ||
+           (document.getElementById("permissionMenuCommercialDenied").getAttribute("checked") && /nc/.test(licensePart))
+          ))
+      { filterMatch = true; }
+      item.hidden = !filterMatch;
+    } else {
+      item.hidden = true;
+    }
+  }
+  /* Update item label */
+  var typeStringComponents = [];
+  if (document.getElementById("typeMenuImage").getAttribute("checked")) { typeStringComponents.push("Images"); }
+  if (document.getElementById("typeMenuAudio").getAttribute("checked")) { typeStringComponents.push("Audios"); }
+  if (document.getElementById("typeMenuVideo").getAttribute("checked")) { typeStringComponents.push("Videos"); }
+  document.getElementById("typeMenuButton").label = typeStringComponents.join(", ");
+  var permissionStringComponents = [];
+  var permissionComLabel = document.querySelector("menuitem[name='permissionMenuCommercial'][checked='true']").label;
+  if (permissionComLabel != "Not Filtered") permissionStringComponents.push(permissionComLabel);
+  var permissionModLabel = document.querySelector("menuitem[name='permissionMenuModification'][checked='true']").label;
+  if (permissionModLabel != "Not Filtered") permissionStringComponents.push(permissionModLabel);
+  if (permissionStringComponents.length > 0) {
+    document.getElementById("permissionMenuButton").label = permissionStringComponents.join(", ");
+  } else {
+    document.getElementById("permissionMenuButton").label = "Not Filtered";
   }
 };
 
