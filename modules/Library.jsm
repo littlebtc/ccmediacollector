@@ -126,6 +126,8 @@ LibraryPrivate.handleDownloadEvent = function(id, type, value) {
 };
 /* Parse the items to CCREL meanful XHTML using E4X */
 LibraryPrivate.parseAndExportItemsToXHTML = function(items) {
+  /* nsILocalFile Constructor helper */
+  var _fileInstance = Components.Constructor("@mozilla.org/file/local;1", "nsILocalFile", "initWithPath");
   var xhtml = <html xmlns="http://www.w3.org/1999/xhtml" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/">
   <head>
     <title>CC Media Collector</title>
@@ -144,11 +146,46 @@ LibraryPrivate.parseAndExportItemsToXHTML = function(items) {
         if (item.license_sa) { licenseNameParts.push("ShareAlike"); }
         if (item.license_nd) { licenseNameParts.push("NoDerivs"); }
         var licenseNamePart = licenseNameParts.join("-");
-        var versionMatch = item.license_url.match(/(\/[0-9]+\.[0-9+]\/)/);
-        if (versionMatch) licenseNamePart = versionMatch[1];
-        resultXHTML += <div class="item">
+        var versionMatch = item.license_url.match(/\/([0-9]+\.[0-9+])\//);
+        if (versionMatch) licenseNamePart += versionMatch[1];
+        /* Add thumbnail to XHTML if needed. XXX: Is there any metadata vocabulary to meet it? */
+        var thumbnailXHTML = <></>
+        if (item.thumbnail_file) {
+          var thumbnailFileInstance = new _fileInstance(item.thumbnail_file);
+          var thumbnailUrl = Services.io.newFileURI(thumbnailFileInstance).spec;
+          thumbnailXHTML = <img src={thumbnailUrl} class="thumbnail" />
+        }
+        /* Fill the dc:type and the content field with XHTML.
+           XXX: We should apply some HTML5 player wrapper to make <audio> and <video> work on more browsers */
+        var fileInstance = new _fileInstance(item.file);
+        var fileUrl = Services.io.newFileURI(fileInstance).spec;
+        var contentXHTML = <></>;
+        var dcType = "";
+        var dcTypeName = "";
+        switch (item.type) {
+          case "dcmitype:Sound":
+            dcType = "http://purl.org/dc/dcmitype/Sound";
+            dcTypeName = "Audio";
+            contentXHTML = <audio src={fileUrl} autoplay="false" />;
+            break;
+          case "dcmitype:StillImage":
+            dcType = "http://purl.org/dc/dcmitype/StillImage";
+            dcTypeName = "Image";
+            contentXHTML = <img src={fileUrl} />;
+            break;
+          case "dcmitype:MovingImage":
+            dcType = "http://purl.org/dc/dcmitype/MovingImage";
+            dcTypeName = "Video";
+            contentXHTML = <video src={fileUrl} autoplay="false" />;
+            break;
+        }
+        resultXHTML += <div class="item">{thumbnailXHTML}
+        <span property="dc:type" href={dcType}>{dcTypeName}</span>
         <h3 property="dc:title">{item.title}</h3>
-        <p>by <a href="{item.attribution_url}" rel="cc:attributionURL">{item.attribution_name}</a>, license under <a href="{item.license_url}">Creative Commons {licenseNamePart}</a></p>
+        <p>by <a href={item.attribution_url} rel="cc:attributionURL">{item.attribution_name}</a>, license under <a href={item.license_url}>Creative Commons {licenseNamePart}</a></p>
+        <div class="itemContent">
+        {contentXHTML}
+        </div>
         </div>;
       }
       return resultXHTML;
@@ -243,6 +280,12 @@ Library.getAll = function(thisObj, successCallback, failCallback) {
   var callback = generateStatementCallback("getAll", thisObj, successCallback, failCallback, dbFields);
   statement.executeAsync(callback);
 };
+/* Asynchorouslly get all items, sorted in ascending order */
+Library.getAllAsc = function(thisObj, successCallback, failCallback) {
+  var statement = LibraryPrivate.dbConnection.createStatement("SELECT * FROM `library` ORDER BY `id` ASC");
+  var callback = generateStatementCallback("getAll", thisObj, successCallback, failCallback, dbFields);
+  statement.executeAsync(callback);
+};
 /* Is the library item exists ? If yes, return the id of the item. */
 Library.checkExistence = function(url, thisObj, successCallback) {
   var statement = LibraryPrivate.dbConnection.createStatement("SELECT `id`, `url` FROM `library` WHERE `url` = :url");
@@ -329,7 +372,7 @@ Library.update = function(id, params) {
 
 Library.exportToXHTML = function() {
   /* First get all items in the library. */
-  this.getAll(LibraryPrivate, "parseAndExportItemsToXHTML", "dbFail");  
+  this.getAllAsc(LibraryPrivate, "parseAndExportItemsToXHTML", "dbFail");  
 };
 
 /* Make other instances listens to the changes to the library. */
