@@ -62,20 +62,19 @@ DownloadUtils.prototype = {
         if (aStateFlags & 1) {
           /* Get HTTP Channel. */
           var channel = aRequest.QueryInterface(Ci.nsIHttpChannel);
-
           /* Try to find the correct file type if we are unsure. */
           if (this._parentInstance._title) {
             /* Set default file extension to HTML. */
             this._parentInstance._fileType = "htm";
-            /* Use Content-Disposition if available */
-            var contentDisposition = channel.getResponseHeader("Content-Disposition");
-            if (contentDisposition) {
+            /* Use Content-Disposition if available, if not, getResponseHeader will throw an error so a try...catch block is used.  */
+            try {
+              var contentDisposition = channel.getResponseHeader("Content-Disposition");
               /* Try to find filename="xxx.mp3" prt */
               var fileTypeMatch = /\.([0-9a-z]{1,4})\"?;?/i.exec(contentDisposition);
               if (fileTypeMatch) {
                 this._parentInstance._fileType = fileTypeMatch[1].toLowerCase();
               }
-            } else {
+            } catch(e) {
               /* Then try to sniff URL */
               var newUrl = channel.URI.spec;
               newUrl = newUrl.replace(/\?.*$/, "");
