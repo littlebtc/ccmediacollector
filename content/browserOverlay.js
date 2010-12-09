@@ -4,6 +4,10 @@
 var ccMediaCollector = {};
 /* Fire when browser.js is loading. */
 ccMediaCollector.onLoad = function() {
+  /* Apply in-content UI whitelist to about:collection on Firefox 4. http://bugzil.la/571970 */
+  if (XULBrowserWindow.inContentWhitelist) {
+    XULBrowserWindow.inContentWhitelist.push("about:collection");
+  }
   var appcontent = document.getElementById("appcontent");
   appcontent.addEventListener("DOMContentLoaded", ccMediaCollector.onPageLoad, true);
   gBrowser.addProgressListener(this.progressListener, Ci.nsIWebProgress.NOTIFY_LOCATION);  
