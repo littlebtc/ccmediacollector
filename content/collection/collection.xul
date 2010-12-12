@@ -31,6 +31,9 @@
   </popupset>
   <vbox flex="1">
     <hbox align="center">
+      <textbox type="search" emptytext="&search.emptytext;" oncommand="collection.search();" id="searchText" size="30"/>
+    </hbox>
+    <hbox align="center">
       <label value="Type:" />
       <button label="Images, Audios, Videos" id="typeMenuButton" type="menu">
         <menupopup>
@@ -55,7 +58,7 @@
         </menupopup>
       </button>
       <spacer flex="1" />
-      <textbox type="search" emptytext="&search.emptytext;" oncommand="collection.search();" id="searchText" size="30"/>
+      <button label="&export.label;" oncommand="collection.export();" />
     </hbox>
     <hbox flex="1">
       <!--

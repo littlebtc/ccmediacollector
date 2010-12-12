@@ -18,6 +18,7 @@
 <!ENTITY permissionMenuModShareAlike.accesskey "S">
 <!ENTITY permissionMenuModDenied.label "Modifications Denied">
 <!ENTITY permissionMenuModDenied.accesskey "D">
+<!ENTITY export.label "Export Collection to XHTML">
 <!ENTITY popup.cancel.label "Cancel Download">
 <!ENTITY popup.cancel.accesskey "C">
 <!ENTITY popup.fetch.label "Fetch Original File">

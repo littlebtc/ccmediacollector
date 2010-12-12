@@ -201,6 +201,11 @@ collection.removeItem = function() {
   document.getElementById("mediaInfoLicenseImage").removeAttribute("src");
 };
 
+/* Call the Library.jsm to export items to XHTML */
+collection.export = function() {
+  this.Library.exportToXHTML();
+};
+
 /* Generate context menu item right when user right-click on the item */
 collection.generateContextMenu = function(aEvent) {
   /* Check for context menu showing */
