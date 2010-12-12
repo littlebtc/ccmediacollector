@@ -117,7 +117,7 @@
           </row>
           <row>
             <label value="&mediaInfoLicense.label;" />
-            <hbox>
+            <hbox align="center">
               <image id="mediaInfoLicenseImage" />
             </hbox>
           </row>
