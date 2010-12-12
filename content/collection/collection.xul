@@ -30,9 +30,6 @@
     </menupopup>
   </popupset>
   <vbox flex="1">
-    <hbox>
-      <textbox type="search" emptytext="Search" oncommand="collection.search();" id="searchText" size="50"/>
-    </hbox>
     <hbox align="center">
       <label value="Type:" />
       <button label="Images, Audios, Videos" id="typeMenuButton" type="menu">
@@ -52,11 +49,13 @@
           <menuseparator />
           <menuitem disabled="true" label="Modifications" />
           <menuitem id="permissionMenuModificationNotFiltered" type="radio" name="permissionMenuModification" label="Not Filtered" checked="true" oncommand="collection.search();"/>
-          <menuitem id="permissionMenuModificationAllowed" type="radio" name="permissionMenuModification" label="Modifications Allowed, Whether or Not Others Share Alike" oncommand="collection.search();"/>
-          <menuitem id="permissionMenuModificationShareAlike" type="radio" name="permissionMenuModification" label="Modifications Allowed, If Others Share Alike" oncommand="collection.search();"/>
+          <menuitem id="permissionMenuModificationAllowed" type="radio" name="permissionMenuModification" label="Modifications Allowed, Need Not Share Alike" oncommand="collection.search();"/>
+          <menuitem id="permissionMenuModificationShareAlike" type="radio" name="permissionMenuModification" label="Modifications Allowed, Must Share Alike" oncommand="collection.search();"/>
           <menuitem id="permissionMenuModificationDenied" type="radio" name="permissionMenuModification" label="Modifications Denied" oncommand="collection.search();"/>
         </menupopup>
       </button>
+      <spacer flex="1" />
+      <textbox type="search" emptytext="Search" oncommand="collection.search();" id="searchText" size="30"/>
     </hbox>
     <hbox flex="1">
       <!--

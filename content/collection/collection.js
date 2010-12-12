@@ -67,6 +67,30 @@ collection.search = function() {
   var terms = value.replace(/^\s+|\s+$/g, "").toLowerCase().split(/\s+/);
   var searchAttributes = ["title", "original_title", "url", "attribution_name", "attribution_url"];
 
+  /* Fetch the value settings for filters */
+  var displayTypeNames = ["Image", "Audio", "Video"];
+  var displayType = {};
+  var permissionForComNames = ["NotFiltered", "Allowed", "Denied"];
+  var permissionForCom = "";
+  var permissionForModNames = ["NotFiltered", "Allowed", "ShareAlike", "Denied"];
+  var permissionForMod = "";
+  var name = "";
+  for each (name in displayTypeNames) {
+    displayType[name] = Boolean(document.getElementById("typeMenu" + name).getAttribute("checked"));
+  }
+  for each (name in permissionForComNames) {
+    if (document.getElementById("permissionMenuCommercial" + name).getAttribute("checked")) {
+      permissionForCom = name;
+      break;
+    }
+  }
+  for each (name in permissionForModNames) {
+    if(document.getElementById("permissionMenuModification" + name).getAttribute("checked")) {
+      permissionForMod = name;
+      break;
+    }
+  }
+
   for (var i = 0; i < items.length; i++) {
     var item = items[i];
     var searchKeyword = "";
@@ -86,18 +110,18 @@ collection.search = function() {
       var licensePart = item.getAttribute("license_part");
       var filterMatch = false;
       if ((
-           (document.getElementById("typeMenuImage").getAttribute("checked") && type == "dcmitype:StillImage") ||
-           (document.getElementById("typeMenuAudio").getAttribute("checked") && type == "dcmitype:Sound") ||
-           (document.getElementById("typeMenuVideo").getAttribute("checked") && type == "dcmitype:MovingImage")
+           (displayType["Image"] && type == "dcmitype:StillImage") ||
+           (displayType["Audio"] && type == "dcmitype:Sound") ||
+           (displayType["Video"] && type == "dcmitype:MovingImage")
           ) && (
-           (document.getElementById("permissionMenuModificationNotFiltered").getAttribute("checked")) ||
-           (document.getElementById("permissionMenuModificationAllowed").getAttribute("checked") && !/(?:sa|nd)/.test(licensePart)) ||
-           (document.getElementById("permissionMenuModificationShareAlike").getAttribute("checked") && /sa/.test(licensePart)) ||
-           (document.getElementById("permissionMenuModificationDenied").getAttribute("checked") && /nd/.test(licensePart))
+           (permissionForCom == "NotFiltered") ||
+           (permissionForCom == "Allowed" && !/nc/.test(licensePart)) ||
+           (permissionForCom == "Denied" && /nc/.test(licensePart))
           ) && (
-           (document.getElementById("permissionMenuCommercialNotFiltered").getAttribute("checked")) ||
-           (document.getElementById("permissionMenuCommercialAllowed").getAttribute("checked") && !/nc/.test(licensePart)) ||
-           (document.getElementById("permissionMenuCommercialDenied").getAttribute("checked") && /nc/.test(licensePart))
+           (permissionForMod == "NotFiltered") ||
+           (permissionForMod == "Allowed" && !/(?:sa|nd)/.test(licensePart)) ||
+           (permissionForMod == "ShareAlike" && /sa/.test(licensePart)) ||
+           (permissionForMod == "Denied" && /nd/.test(licensePart))
           ))
       { filterMatch = true; }
       item.hidden = !filterMatch;
@@ -107,14 +131,15 @@ collection.search = function() {
   }
   /* Update item label */
   var typeStringComponents = [];
-  if (document.getElementById("typeMenuImage").getAttribute("checked")) { typeStringComponents.push("Images"); }
-  if (document.getElementById("typeMenuAudio").getAttribute("checked")) { typeStringComponents.push("Audios"); }
-  if (document.getElementById("typeMenuVideo").getAttribute("checked")) { typeStringComponents.push("Videos"); }
+  if (displayType["Image"]) { typeStringComponents.push("Images"); }
+  if (displayType["Audio"]) { typeStringComponents.push("Audios"); }
+  if (displayType["Video"]) { typeStringComponents.push("Videos"); }
   document.getElementById("typeMenuButton").label = typeStringComponents.join(", ");
+
   var permissionStringComponents = [];
-  var permissionComLabel = document.querySelector("menuitem[name='permissionMenuCommercial'][checked='true']").label;
+  var permissionComLabel = document.getElementById("permissionMenuCommercial" + permissionForCom).label;
   if (permissionComLabel != "Not Filtered") permissionStringComponents.push(permissionComLabel);
-  var permissionModLabel = document.querySelector("menuitem[name='permissionMenuModification'][checked='true']").label;
+  var permissionModLabel = document.getElementById("permissionMenuModification" + permissionForMod).label;
   if (permissionModLabel != "Not Filtered") permissionStringComponents.push(permissionModLabel);
   if (permissionStringComponents.length > 0) {
     document.getElementById("permissionMenuButton").label = permissionStringComponents.join(", ");

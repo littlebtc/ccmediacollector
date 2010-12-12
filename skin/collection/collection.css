@@ -1,6 +1,16 @@
 #collectionList > richlistitem {
   -moz-binding: url("chrome://ccmediacollector/content/collection.xml#ccmc-media-item");
+  padding: 3px;
 }
+
+#collectionList > richlistitem .thumbnail {
+  margin-right: 5px;
+}
+
+#collectionList > richlistitem .title {
+  font-size: 120%;`
+}
+
 .thumbnail {
   -moz-background-size: 75px;
   background-size: 75px;

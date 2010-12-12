@@ -4,13 +4,16 @@
           xmlns:xbl="http://www.mozilla.org/xbl">
   <binding id="ccmc-media-item" extends="chrome://global/content/bindings/richlistbox.xml#richlistitem">
     <content>
-      <xul:hbox flex="1">      
+      <xul:hbox flex="1" align="center">
         <xul:spacer anonid="thumbnail" class="thumbnail"/> <!--XXX: Why makes size fixed here? -->
         <xul:vbox flex="1">
           <hbox>
-            <xul:label xbl:inherits="value=title" crop="end" flex="1" />
-            <xul:image xbl:inherits="src=licensethumbnail" class="licensethumbnail"/> <!--XXX: Why makes size fixed here? -->
+            <xul:label xbl:inherits="value=title" crop="end" flex="1" class="title" />
           </hbox>
+          <hbox>
+            <xul:label xbl:inherits="value=attribution_name" crop="end" flex="1" />
+          </hbox>
+          <xul:image xbl:inherits="src=licensethumbnail" class="licensethumbnail"/> <!--XXX: Why makes size fixed here? -->
         </xul:vbox>
       </xul:hbox>
     </content>
