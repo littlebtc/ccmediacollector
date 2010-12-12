@@ -5,7 +5,7 @@
 
 <page xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
       onload="collection.onLoad();" onunload="collection.onUnload();"
-      title="Media Collection">
+      title="&page.title;">
   <script type="application/x-javascript" src="chrome://ccmediacollector/content/collection/collection.js" />
   <!--<stringbundleset id="stringbundleset">
     <stringbundle id="nicomonkey-strings" src="chrome://ccmediacollector/locale/collection.properties"/>
@@ -34,28 +34,28 @@
       <label value="Type:" />
       <button label="Images, Audios, Videos" id="typeMenuButton" type="menu">
         <menupopup>
-          <menuitem id="typeMenuImage" type="checkbox" label="Images" checked="true" oncommand="collection.search();"/>
-          <menuitem id="typeMenuAudio" type="checkbox" label="Audios" checked="true" oncommand="collection.search();"/>
-          <menuitem id="typeMenuVideo" type="checkbox" label="Videos" checked="true" oncommand="collection.search();"/>
+          <menuitem id="typeMenuImage" type="checkbox" label="&typeMenuImage.label;" accesskey="&typeMenuImage.accesskey;" checked="true" oncommand="collection.search();"/>
+          <menuitem id="typeMenuAudio" type="checkbox" label="&typeMenuAudio.label;" accesskey="&typeMenuAudio.accesskey;" checked="true" oncommand="collection.search();"/>
+          <menuitem id="typeMenuVideo" type="checkbox" label="&typeMenuVideo.label;" accesskey="&typeMenuVideo.accesskey;" checked="true" oncommand="collection.search();"/>
         </menupopup>
       </button>
       <label value="Permission:" />
       <button id="permissionMenuButton" label="Not Filtered" type="menu">
         <menupopup>
           <menuitem disabled="true" label="Commercial uses" />
-          <menuitem id="permissionMenuCommercialNotFiltered" type="radio" name="permissionMenuCommercial" label="Not Filtered" checked="true" oncommand="collection.search();"/>
-          <menuitem id="permissionMenuCommercialAllowed" type="radio" name="permissionMenuCommercial" label="Commercial Uses Allowed" oncommand="collection.search();"/>
-          <menuitem id="permissionMenuCommercialDenied" type="radio" name="permissionMenuCommercial" label="Commercial Uses Denied" oncommand="collection.search();"/>
+          <menuitem id="permissionMenuComNotFiltered" type="radio" name="permissionMenuCom" label="&notFiltered.label;" accesskey="&notFiltered.accesskey;" checked="true" oncommand="collection.search();"/>
+          <menuitem id="permissionMenuComAllowed" type="radio" name="permissionMenuCom" label="&permissionMenuComAllowed.label;" accesskey="&permissionMenuComAllowed.accesskey;" oncommand="collection.search();"/>
+          <menuitem id="permissionMenuComDenied" type="radio" name="permissionMenuCom" label="&permissionMenuComDenied.label;" accesskey="&permissionMenuComDenied.accesskey;" oncommand="collection.search();"/>
           <menuseparator />
           <menuitem disabled="true" label="Modifications" />
-          <menuitem id="permissionMenuModificationNotFiltered" type="radio" name="permissionMenuModification" label="Not Filtered" checked="true" oncommand="collection.search();"/>
-          <menuitem id="permissionMenuModificationAllowed" type="radio" name="permissionMenuModification" label="Modifications Allowed, Need Not Share Alike" oncommand="collection.search();"/>
-          <menuitem id="permissionMenuModificationShareAlike" type="radio" name="permissionMenuModification" label="Modifications Allowed, Must Share Alike" oncommand="collection.search();"/>
-          <menuitem id="permissionMenuModificationDenied" type="radio" name="permissionMenuModification" label="Modifications Denied" oncommand="collection.search();"/>
+          <menuitem id="permissionMenuModNotFiltered" type="radio" name="permissionMenuMod" label="&notFiltered.label;" accesskey="&notFiltered.accesskey;" checked="true" oncommand="collection.search();"/>
+          <menuitem id="permissionMenuModAllowed" type="radio" name="permissionMenuMod" label="&permissionMenuModAllowed.label;" accesskey="&permissionMenuModAllowed.accesskey;" oncommand="collection.search();"/>
+          <menuitem id="permissionMenuModShareAlike" type="radio" name="permissionMenuMod" label="&permissionMenuModShareAlike.label;" accesskey="&permissionMenuModShareAlike.accesskey;" oncommand="collection.search();"/>
+          <menuitem id="permissionMenuModDenied" type="radio" name="permissionMenuMod" label="&permissionMenuModDenied.label;" accesskey="&permissionMenuModDenied.accesskey;" oncommand="collection.search();"/>
         </menupopup>
       </button>
       <spacer flex="1" />
-      <textbox type="search" emptytext="Search" oncommand="collection.search();" id="searchText" size="30"/>
+      <textbox type="search" emptytext="&search.emptytext;" oncommand="collection.search();" id="searchText" size="30"/>
     </hbox>
     <hbox flex="1">
       <!--
@@ -85,7 +85,7 @@
     <richlistbox id="collectionList" height="300" flex="1" onselect="collection.onItemSelected(this);" context="libraryItemPopup">
     </richlistbox>
     <groupbox width="375">
-      <caption label="Media Information" />
+      <caption label="&mediaInfo.title;" />
       <grid>
         <columns>
           <column />
@@ -93,27 +93,27 @@
         </columns>
         <rows>
           <row>
-            <label value="URL:" />
+            <label value="&mediaInfoURL.label;" />
             <label id="mediaInfoURL" class="text-link" onclick="if (this.value) collection.openURL(this.value);" crop="end"/>
           </row>
           <row>
-            <label value="Title:" />
+            <label value="&mediaInfoTitle.label;" />
             <textbox id="mediaInfoTitle" />
           </row>
           <row>
-            <label value="Original Title:" />
+            <label value="&mediaInfoOriginalTitle.label;" />
             <textbox id="mediaInfoOriginalTitle" disabled="true"/>
           </row>
           <row>
-            <label value="Author:" />
+            <label value="&mediaInfoAuthor.label;" />
             <textbox id="mediaInfoAttributionName" disabled="true" />
           </row>
           <row>
-            <label value="Attribution URL:" />
+            <label value="&mediaInfoAttributionURL.label;" />
             <textbox id="mediaInfoAttributionURL" disabled="true" />
           </row>
           <row>
-            <label value="License:" />
+            <label value="&mediaInfoLicense.label;" />
             <hbox>
               <image id="mediaInfoLicenseImage" />
             </hbox>
@@ -121,10 +121,10 @@
         </rows>
       </grid>
       <hbox>
-        <button label="Change" oncommand="collection.changeItem();"/>
+        <button label="&mediaInfoChange.label;" oncommand="collection.changeItem();"/>
       </hbox>
       <hbox>
-        <label id="mediaInfoRemove" value="Remove from collection" class="text-link" onclick="collection.removeItem();"/>
+        <label id="mediaInfoRemove" value="&mediaInfoRemove.label;" class="text-link" onclick="collection.removeItem();"/>
       </hbox>
     </groupbox>
   </hbox>

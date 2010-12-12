@@ -79,13 +79,13 @@ collection.search = function() {
     displayType[name] = Boolean(document.getElementById("typeMenu" + name).getAttribute("checked"));
   }
   for each (name in permissionForComNames) {
-    if (document.getElementById("permissionMenuCommercial" + name).getAttribute("checked")) {
+    if (document.getElementById("permissionMenuCom" + name).getAttribute("checked")) {
       permissionForCom = name;
       break;
     }
   }
   for each (name in permissionForModNames) {
-    if(document.getElementById("permissionMenuModification" + name).getAttribute("checked")) {
+    if(document.getElementById("permissionMenuMod" + name).getAttribute("checked")) {
       permissionForMod = name;
       break;
     }
@@ -131,15 +131,15 @@ collection.search = function() {
   }
   /* Update item label */
   var typeStringComponents = [];
-  if (displayType["Image"]) { typeStringComponents.push("Images"); }
-  if (displayType["Audio"]) { typeStringComponents.push("Audios"); }
-  if (displayType["Video"]) { typeStringComponents.push("Videos"); }
+  if (displayType["Image"]) { typeStringComponents.push(document.getElementById("typeMenuImage").label); }
+  if (displayType["Audio"]) { typeStringComponents.push(document.getElementById("typeMenuAudio").label); }
+  if (displayType["Video"]) { typeStringComponents.push(document.getElementById("typeMenuVideo").label); }
   document.getElementById("typeMenuButton").label = typeStringComponents.join(", ");
 
   var permissionStringComponents = [];
-  var permissionComLabel = document.getElementById("permissionMenuCommercial" + permissionForCom).label;
+  var permissionComLabel = document.getElementById("permissionMenuCom" + permissionForCom).label;
   if (permissionComLabel != "Not Filtered") permissionStringComponents.push(permissionComLabel);
-  var permissionModLabel = document.getElementById("permissionMenuModification" + permissionForMod).label;
+  var permissionModLabel = document.getElementById("permissionMenuMod" + permissionForMod).label;
   if (permissionModLabel != "Not Filtered") permissionStringComponents.push(permissionModLabel);
   if (permissionStringComponents.length > 0) {
     document.getElementById("permissionMenuButton").label = permissionStringComponents.join(", ");

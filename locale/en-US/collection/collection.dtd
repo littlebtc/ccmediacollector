@@ -1,3 +1,23 @@
+<!ENTITY page.title "Media Collection">
+<!ENTITY typeMenuImage.label "Images">
+<!ENTITY typeMenuImage.accesskey "I">
+<!ENTITY typeMenuAudio.label "Audios">
+<!ENTITY typeMenuAudio.accesskey "A">
+<!ENTITY typeMenuVideo.label "Videos">
+<!ENTITY typeMenuVideo.accesskey "V">
+<!ENTITY notFiltered.label "Not Filtered">
+<!ENTITY notFiltered.accesskey "N">
+<!ENTITY search.emptytext "Search">
+<!ENTITY permissionMenuComAllowed.label "Commercial Uses Allowed">
+<!ENTITY permissionMenuComAllowed.accesskey "A">
+<!ENTITY permissionMenuComDenied.label "Commercial Uses Denied">
+<!ENTITY permissionMenuComDenied.accesskey "D">
+<!ENTITY permissionMenuModAllowed.label "Modifications Allowed, Need Not Share Alike">
+<!ENTITY permissionMenuModAllowed.accesskey "A">
+<!ENTITY permissionMenuModShareAlike.label "Modifications Allowed, Must Share Alike">
+<!ENTITY permissionMenuModShareAlike.accesskey "S">
+<!ENTITY permissionMenuModDenied.label "Modifications Denied">
+<!ENTITY permissionMenuModDenied.accesskey "D">
 <!ENTITY popup.cancel.label "Cancel Download">
 <!ENTITY popup.cancel.accesskey "C">
 <!ENTITY popup.fetch.label "Fetch Original File">
@@ -15,3 +35,12 @@
 <!ENTITY popup.remove.label "Remove from List">
 <!ENTITY popup.remove.accesskey "R">
 
+<!ENTITY mediaInfo.title "Media Information">
+<!ENTITY mediaInfoURL.label "URL:">
+<!ENTITY mediaInfoTitle.label "Title:">
+<!ENTITY mediaInfoOriginalTitle.label "Original Title:">
+<!ENTITY mediaInfoAuthor.label "Author:">
+<!ENTITY mediaInfoAttributionURL.label "Attribution URL:">
+<!ENTITY mediaInfoLicense.label "License:">
+<!ENTITY mediaInfoChange.label "Change">
+<!ENTITY mediaInfoRemove.label "Remove from collection">
