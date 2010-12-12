@@ -30,7 +30,7 @@ collection.updateItem = function(item, info) {
     if (licensePart) {
       item.setAttribute("license_part", licensePart[1]);
       var license = document.createElement("image");
-      item.setAttribute("licensethumbnail", "http://i.creativecommons.org/l/"+ licensePart[1] +"/3.0/80x15.png");
+      item.setAttribute("licensethumbnail", "chrome://ccmediacollector/skin/ccicons/"+ licensePart[1] +".png");
     }
   }
   if (info.file) {

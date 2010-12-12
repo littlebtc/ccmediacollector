@@ -116,7 +116,7 @@ ccMediaCollector.fillPanelInfo = function(anchor) {
     if (info.license_url) {
       var licensePart = info.license_url.match(/\/(by[a-z\-]*)\//)
       if (licensePart) {
-       document.getElementById("ccmc-info-license").src = "http://i.creativecommons.org/l/"+ licensePart[1] +"/3.0/80x15.png";
+       document.getElementById("ccmc-info-license").src = "chrome://ccmediacollector/skin/ccicons/"+ licensePart[1] +".png";
       }
     }
     if (info.thumbnail_url) {
