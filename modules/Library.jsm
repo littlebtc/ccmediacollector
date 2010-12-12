@@ -200,17 +200,17 @@ LibraryPrivate.parseAndExportItemsToXHTML = function(items) {
           case "dcmitype:Sound":
             dcType = "http://purl.org/dc/dcmitype/Sound";
             dcTypeName = "Audio";
-            contentXHTML = <audio src={fileUrl} controls="controls"/>;
+            contentXHTML = <a href={fileUrl}>File Link</a>;
             break;
           case "dcmitype:StillImage":
             dcType = "http://purl.org/dc/dcmitype/StillImage";
             dcTypeName = "Image";
-            contentXHTML = <img src={fileUrl}/>;
+            contentXHTML = <img src={fileUrl} />;
             break;
           case "dcmitype:MovingImage":
             dcType = "http://purl.org/dc/dcmitype/MovingImage";
             dcTypeName = "Video";
-            contentXHTML = <video src={fileUrl} controls="controls"/>;
+            contentXHTML = <a href={fileUrl}>File Link</a>;
             break;
         }
         resultXHTML += <div class="item">{thumbnailXHTML}
@@ -238,7 +238,7 @@ LibraryPrivate.parseAndExportItemsToXHTML = function(items) {
   var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);  
   converter.charset = "UTF-8";
   var iStream = converter.convertToInputStream("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
-                                              "<!DOCTYPE html>\n" + xhtml.toXMLString());  
+                                              "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n" + xhtml.toXMLString());
   
   Components.utils.import("resource://gre/modules/NetUtil.jsm");
   NetUtil.asyncCopy(iStream, foStream);  
