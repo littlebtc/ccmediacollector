@@ -303,6 +303,18 @@ function generateStatementCallback(callerName, thisObj, successCallback, failCal
   return callback;  
 }
 
+/* Remove a file with specific path, with no error handling */
+function removeFile(filePath) {
+  var _fileInstance = Components.Constructor("@mozilla.org/file/local;1", "nsILocalFile", "initWithPath");
+  var file = new _fileInstance(filePath);
+  if (file.exists()) {
+    try {
+      file.remove(false);
+    } catch(e) {
+    }
+  }
+}
+
 /* Startup: check the folder, add database if needed */
 Library.startup = function() {
   if (!LibraryPrivate.setDefaultDir()) {
@@ -398,13 +410,23 @@ Library.fetchOriginalContent = function(id) {
 /* Remove item with specific id from library */ 
 Library.remove = function(id) {
   if (!id) { return; }
-  var statement = LibraryPrivate.dbConnection.createStatement("DELETE FROM `library` WHERE `id` = :id");
+  /* First get the item to find its file location */
+  var statement = LibraryPrivate.dbConnection.createStatement("SELECT * FROM `library` WHERE `id` = :id");
   statement.params.id = id;
-  /* After item removed, notify listeners */
+  /* Callback will be run after the item is fetched */
   var innerCallback = {
-   successCallback: function() { 
-     triggerListeners("remove", id, null);
+   successCallback: function(items) {
+     if (items.length != 1) { return; }
+     var item = items[0];
      /* Remove related files if needed */
+     if (item.file) { removeFile(item.file); }
+     if (item.thumbnail_file) { removeFile(item.thumbnail_file); }
+     /* Actually remove the item in the table */
+     var statement = LibraryPrivate.dbConnection.createStatement("DELETE FROM `library` WHERE `id` = :id");
+     statement.params.id = id;
+     statement.execute();
+     /* After item removed, notify listeners */
+     triggerListeners("remove", id, null);
 
    },
    failCallback: function() { /* Do nothing */ }
