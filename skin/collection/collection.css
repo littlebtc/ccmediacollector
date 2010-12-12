@@ -2,6 +2,9 @@
   -moz-binding: url("chrome://ccmediacollector/content/collection.xml#ccmc-media-item");
   padding: 3px;
 }
+#collectionList > richlistitem[fetching="true"] {
+  -moz-binding: url("chrome://ccmediacollector/content/collection.xml#ccmc-media-item-fetching");
+}
 
 #collectionList > richlistitem .thumbnail {
   margin-right: 5px;
@@ -9,6 +12,16 @@
 
 #collectionList > richlistitem .title {
   font-size: 120%;`
+}
+
+#mediaInfoImage {
+  margin-top: 10px;
+  -moz-background-size: 300px;
+  background-size: 300px;
+  background-repeat: no-repeat;
+  background-position: center center;
+  width: 300px;
+  height: 300px;
 }
 
 .thumbnail {

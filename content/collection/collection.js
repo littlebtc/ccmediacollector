@@ -14,7 +14,38 @@ collection.onUnload = function() {
   this.Library.removeListener(this.listener);
 };
 
-/* Display items after get items asynchrously */
+collection.updateItem = function(item, info) {
+
+  item.setAttribute("ccmcid", info.id);
+  item.setAttribute("ccmctype", info.type);
+  item.setAttribute("title", info.title);
+  item.setAttribute("original_title", info.original_title);
+  item.setAttribute("url", info.url);
+  item.setAttribute("attribution_name", info.attribution_name);
+  item.setAttribute("attribution_url", info.attribution_url);
+    
+  if (info.license_url) {
+    item.setAttribute("license_url", info.license_url);
+    var licensePart = info.license_url.match(/\/(by[a-z\-]*)\//);
+    if (licensePart) {
+      item.setAttribute("license_part", licensePart[1]);
+      var license = document.createElement("image");
+      item.setAttribute("licensethumbnail", "http://i.creativecommons.org/l/"+ licensePart[1] +"/3.0/80x15.png");
+    }
+  }
+  if (info.file) {
+    item.setAttribute("file", info.file);
+  }
+  /* Get thumbnail from local or remote site */
+  if (info.thumbnail_file) {
+    var thumbnailFile = collection._fileInstance(info.thumbnail_file);
+    item.thumbnail = this.Services.io.newFileURI(thumbnailFile).spec;
+  } else if (info.thumbnail_url) {
+    item.thumbnail = info.thumbnail_url;
+  }
+}
+
+/* Display items after get items */
 collection.showItems = function(argsArray) {
   /* Add Listener */
   this.Library.addListener(this.listener);
@@ -22,34 +53,8 @@ collection.showItems = function(argsArray) {
   var list = document.getElementById("collectionList");
   for (var i = 0; i < argsArray.length; i++) {
     var item = document.createElement("richlistitem");
-    item.setAttribute("ccmcid", argsArray[i].id);
-    item.setAttribute("ccmctype", argsArray[i].type);
-    item.setAttribute("title", argsArray[i].title);
-    item.setAttribute("original_title", argsArray[i].original_title);
-    item.setAttribute("url", argsArray[i].url);
-    item.setAttribute("attribution_name", argsArray[i].attribution_name);
-    item.setAttribute("attribution_url", argsArray[i].attribution_url);
-    
-    if (argsArray[i].license_url) {
-      item.setAttribute("license_url", argsArray[i].license_url);
-      var licensePart = argsArray[i].license_url.match(/\/(by[a-z\-]*)\//);
-      if (licensePart) {
-        item.setAttribute("license_part", licensePart[1]);
-        var license = document.createElement("image");
-        item.setAttribute("licensethumbnail", "http://i.creativecommons.org/l/"+ licensePart[1] +"/3.0/80x15.png");
-      }
-    }
-    if (argsArray[i].file) {
-      item.setAttribute("file", argsArray[i].file);
-    }
     list.appendChild(item);
-    /* Get thumbnail from local or remote site */
-    if (argsArray[i].thumbnail_file) {
-      var thumbnailFile = collection._fileInstance(argsArray[i].thumbnail_file);
-      item.thumbnail = this.Services.io.newFileURI(thumbnailFile).spec;
-    } else if (argsArray[i].thumbnail_url) {
-      item.thumbnail = argsArray[i].thumbnail_url;
-    }
+    this.updateItem(item, argsArray[i]);
   }
 };
 collection.dbError = function() {
@@ -160,6 +165,9 @@ collection.onItemSelected = function(obj) {
   if (item.hasAttribute("licensethumbnail")) {
     document.getElementById("mediaInfoLicenseImage").setAttribute("src", item.getAttribute("licensethumbnail"));
   }
+  if (item.hasAttribute("thumbnail")) {
+    document.getElementById("mediaInfoImage").style.backgroundImage = "url('" + item.getAttribute("thumbnail") + "')";
+  }
 };
 
 /* Open an URL in a new tab when clicking the URL address */
@@ -199,6 +207,7 @@ collection.removeItem = function() {
   document.getElementById("mediaInfoAttributionName").value = "";
   document.getElementById("mediaInfoAttributionURL").value = "";
   document.getElementById("mediaInfoLicenseImage").removeAttribute("src");
+  document.getElementById("mediaInfoImage").style.backgroundImage = "";
 };
 
 /* Call the Library.jsm to export items to XHTML */
@@ -290,27 +299,51 @@ collection.popup = {
 
 /* A listener to collection's event */
 collection.listener = {
+  /* When collection item is added */
+  add: function(id, info){
+    var list = document.getElementById("collectionList");
+    var listItem = document.createElement("richlistitem");
+    listItem.setAttribute("fetching", "true");
+    listItem.setAttribute("progresstype", "undetermined");
+    list.insertBefore(listItem, list.firstChild);
+    collection.updateItem(listItem, info);
+  },
   /* When collection is updated */
   update: function(id, info) {
     id = parseInt(id, 10);
-    var node = document.getElementById("collectionList").querySelector("richlistitem[ccmcid='" + id + "']");
-    if (!node) { return; }
+    var listItem = document.getElementById("collectionList").querySelector("richlistitem[ccmcid='" + id + "']");
+    if (!listItem) { return; }
     /* Update info if needed */
     if (info.title) {
-      node.setAttribute("title", info.title);
+      listItem.setAttribute("title", info.title);
     }
     if (info.file) {
-      node.setAttribute("file", info.file);
+      listItem.setAttribute("file", info.file);
+      listItem.removeAttribute("fetching");
     }
+    if (info.thumbnail_file) {
+      var thumbnailFile = collection._fileInstance(info.thumbnail_file);
+      listItem.thumbnail = collection.Services.io.newFileURI(thumbnailFile).spec;
+    }
+  },
+  /* When collection is updated */
+  fetchProgress: function(id, content) {
+    id = parseInt(id, 10);
+    var listItem = document.getElementById("collectionList").querySelector("richlistitem[ccmcid='" + id + "']");
+    if (!listItem) { return; }
+    listItem.setAttribute("fetching", "true");
+    listItem.setAttribute("progresstype", "determined");
+    listItem.setAttribute("currentbytes", content.currentBytes);
+    listItem.setAttribute("maxbytes", content.maxBytes);
   },
   /* When collection is removed */
   remove: function(id) {
     id = parseInt(id, 10);
-    var node = document.getElementById("collectionList").querySelector("richlistitem[ccmcid='" + id + "']");
-    if (!node) { return; }
+    var listItem = document.getElementById("collectionList").querySelector("richlistitem[ccmcid='" + id + "']");
+    if (!listItem) { return; }
     /* Deselect before removing, fix strange selectedItem behavior. */
-    document.getElementById("collectionList").removeItemFromSelection(node);
-    document.getElementById("collectionList").removeChild(node);
+    document.getElementById("collectionList").removeItemFromSelection(listItem);
+    document.getElementById("collectionList").removeChild(listItem);
   }
 };
 /* Helper: Get a nsILocalFile instance from a path */

@@ -378,19 +378,24 @@ Library.add = function(url, info) {
   statement.reset();
   var lastInsertRowID = LibraryPrivate.dbConnection.lastInsertRowID;
   if (info.thumbnail_url) {
-    /* Thumbnail cache, XXX: Should be split out and error-safe */
+    /* Get Thumbnail and store the file path when completed */
     Components.utils.import("resource://ccmediacollector/DownloadPaths.jsm");
     Components.utils.import("resource://ccmediacollector/DownloadUtils.jsm");
     var file = LibraryPrivate.defaultDir.clone();
     file.append(info.title + ".thumb.jpg");
     file = DownloadPaths.createNiceUniqueFile(file)
     var dlInstance = new DownloadUtils();
-    dlInstance.callback = function() {};
+    dlInstance.callback = function(type, value) {
+      if (type == "completed") {
+        LibraryPrivate.update(lastInsertRowID, {thumbnail_file: file.path});
+      }
+    };
     dlInstance.init(info.thumbnail_url, file);
-    LibraryPrivate.update(lastInsertRowID, {thumbnail_file: file.path});
   }
-  /* Call executeFetch to get original content. XXX: Should we add another addAndFetch function? */
+  /* Notify listeners */
   info.id = lastInsertRowID;
+  triggerListeners("add", info.id, info);
+  /* Call executeFetch to get original content. XXX: Should we add another addAndFetch function? */
   LibraryPrivate.executeFetch(info);
   return lastInsertRowID;
 };

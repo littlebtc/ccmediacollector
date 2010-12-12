@@ -87,6 +87,8 @@
     -->
     <richlistbox id="collectionList" height="300" flex="1" onselect="collection.onItemSelected(this);" context="libraryItemPopup">
     </richlistbox>
+    <vbox>
+    <image id="mediaInfoImage"/>
     <groupbox width="375">
       <caption label="&mediaInfo.title;" />
       <grid>
@@ -118,7 +120,7 @@
           <row>
             <label value="&mediaInfoLicense.label;" />
             <hbox align="center">
-              <image id="mediaInfoLicenseImage" />
+              <spacer id="mediaInfoLicenseImage" />
             </hbox>
           </row>
         </rows>
@@ -130,6 +132,7 @@
         <label id="mediaInfoRemove" value="&mediaInfoRemove.label;" class="text-link" onclick="collection.removeItem();"/>
       </hbox>
     </groupbox>
+    </vbox>
   </hbox>
 </vbox>
 </page>

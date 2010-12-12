@@ -7,19 +7,50 @@
       <xul:hbox flex="1" align="center">
         <xul:spacer anonid="thumbnail" class="thumbnail"/> <!--XXX: Why makes size fixed here? -->
         <xul:vbox flex="1">
-          <hbox>
+          <xul:hbox>
             <xul:label xbl:inherits="value=title" crop="end" flex="1" class="title" />
-          </hbox>
-          <hbox>
+          </xul:hbox>
+          <xul:hbox align="center">
             <xul:label xbl:inherits="value=attribution_name" crop="end" flex="1" />
-          </hbox>
-          <xul:image xbl:inherits="src=licensethumbnail" class="licensethumbnail"/> <!--XXX: Why makes size fixed here? -->
+            <xul:image xbl:inherits="src=licensethumbnail" class="licensethumbnail"/> <!--XXX: Why makes size fixed here? -->
+          </xul:hbox>
         </xul:vbox>
       </xul:hbox>
     </content>
     <implementation>
       <property name="thumbnail"
-          onset="document.getAnonymousElementByAttribute(this, 'anonid', 'thumbnail').style.backgroundImage = 'url(\'' + val + '\')';"/>-->
+          onset="document.getAnonymousElementByAttribute(this, 'anonid', 'thumbnail').style.backgroundImage = 'url(\'' + val + '\')'; this.setAttribute('thumbnail', val);" onget="this.getAttribute('thumbnail');"/>
+      <constructor><![CDATA[
+        if (this.hasAttribute("thumbnail")) {
+          this.thumbnail = this.getAttribute("thumbnail");
+        }
+      ]]></constructor>
+    </implementation>
+  </binding>
+  <binding id="ccmc-media-item-fetching" extends="chrome://global/content/bindings/richlistbox.xml#richlistitem">
+    <content>
+      <xul:hbox flex="1" align="center">
+        <xul:spacer anonid="thumbnail" class="thumbnail"/> <!--XXX: Why makes size fixed here? -->
+        <xul:vbox flex="1">
+          <xul:hbox>
+            <xul:label xbl:inherits="value=title" crop="end" flex="1" class="title" />
+          </xul:hbox>
+          <xul:hbox align="center">
+            <xul:label xbl:inherits="value=attribution_name" crop="end" flex="1" />
+            <xul:image xbl:inherits="src=licensethumbnail" class="licensethumbnail"/> <!--XXX: Why makes size fixed here? -->
+          </xul:hbox>
+          <xul:progressmeter xbl:inherits="mode=progresstype,value=currentbytes,max=maxbytes" />
+        </xul:vbox>
+      </xul:hbox>
+    </content>
+    <implementation>
+      <property name="thumbnail"
+          onset="document.getAnonymousElementByAttribute(this, 'anonid', 'thumbnail').style.backgroundImage = 'url(\'' + val + '\')'; this.setAttribute('thumbnail', val);" onget="this.getAttribute('thumbnail');"/>
+      <constructor><![CDATA[
+        if (this.hasAttribute("thumbnail")) {
+          this.thumbnail = this.getAttribute("thumbnail");
+        }
+      ]]></constructor>
     </implementation>
   </binding>
 </bindings>
