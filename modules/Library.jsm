@@ -134,7 +134,7 @@ LibraryPrivate.parseAndExportItemsToXHTML = function(items) {
   var xhtml = <html xmlns="http://www.w3.org/1999/xhtml" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/">
   <head>
     <title>CC Media Collector</title>
-    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
     <style type="text/css">
       <![CDATA[
         h1 {
@@ -190,7 +190,7 @@ LibraryPrivate.parseAndExportItemsToXHTML = function(items) {
         if (item.thumbnail_file) {
           var thumbnailFileInstance = new _fileInstance(item.thumbnail_file);
           var thumbnailUrl = defaultDirURI.getRelativeSpec(Services.io.newFileURI(thumbnailFileInstance));
-          thumbnailXHTML = <img src={thumbnailUrl} class="thumbnail" />
+          thumbnailXHTML = <img src={thumbnailUrl} alt="Thumbnail" class="thumbnail" />
         }
         /* Fill the dc:type and the content field with XHTML.
            XXX: We should apply some HTML5 player wrapper to make <audio> and <video> work on more browsers */
@@ -208,7 +208,7 @@ LibraryPrivate.parseAndExportItemsToXHTML = function(items) {
           case "dcmitype:StillImage":
             dcType = "http://purl.org/dc/dcmitype/StillImage";
             dcTypeName = "Image";
-            contentXHTML = <img src={fileUrl} />;
+            contentXHTML = <img src={fileUrl} alt={item.title}/>;
             break;
           case "dcmitype:MovingImage":
             dcType = "http://purl.org/dc/dcmitype/MovingImage";
@@ -241,7 +241,7 @@ LibraryPrivate.parseAndExportItemsToXHTML = function(items) {
   var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);  
   converter.charset = "UTF-8";
   var iStream = converter.convertToInputStream("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
-                                              "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\" \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n" + xhtml.toXMLString());
+                                              "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML+RDFa 1.0//EN\" \"http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd\">\n" + xhtml.toXMLString());
   
   Components.utils.import("resource://gre/modules/NetUtil.jsm");
   NetUtil.asyncCopy(iStream, foStream);  
