@@ -128,6 +128,9 @@ LibraryPrivate.handleDownloadEvent = function(id, type, value) {
 LibraryPrivate.parseAndExportItemsToXHTML = function(items) {
   /* nsILocalFile Constructor helper */
   var _fileInstance = Components.Constructor("@mozilla.org/file/local;1", "nsILocalFile", "initWithPath");
+  /* Make a nsIURL to compare relative path */
+  var defaultDirURI = Services.io.newFileURI(this.defaultDir).QueryInterface(Ci.nsIURL);
+  Components.utils.reportError(defaultDirURI.spec);
   var xhtml = <html xmlns="http://www.w3.org/1999/xhtml" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/">
   <head>
     <title>CC Media Collector</title>
@@ -186,13 +189,13 @@ LibraryPrivate.parseAndExportItemsToXHTML = function(items) {
         var thumbnailXHTML = <></>
         if (item.thumbnail_file) {
           var thumbnailFileInstance = new _fileInstance(item.thumbnail_file);
-          var thumbnailUrl = Services.io.newFileURI(thumbnailFileInstance).spec;
+          var thumbnailUrl = defaultDirURI.getRelativeSpec(Services.io.newFileURI(thumbnailFileInstance));
           thumbnailXHTML = <img src={thumbnailUrl} class="thumbnail" />
         }
         /* Fill the dc:type and the content field with XHTML.
            XXX: We should apply some HTML5 player wrapper to make <audio> and <video> work on more browsers */
         var fileInstance = new _fileInstance(item.file);
-        var fileUrl = Services.io.newFileURI(fileInstance).spec;
+        var fileUrl = defaultDirURI.getRelativeSpec(Services.io.newFileURI(fileInstance));
         var contentXHTML = <></>;
         var dcType = "";
         var dcTypeName = "";
