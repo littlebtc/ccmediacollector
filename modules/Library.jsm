@@ -244,7 +244,15 @@ LibraryPrivate.parseAndExportItemsToXHTML = function(items) {
                                               "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML+RDFa 1.0//EN\" \"http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd\">\n" + xhtml.toXMLString());
   
   Components.utils.import("resource://gre/modules/NetUtil.jsm");
-  NetUtil.asyncCopy(iStream, foStream);  
+  NetUtil.asyncCopy(iStream, foStream, function(aResult) {
+    /* Show the notification after completed */
+    if (!Components.isSuccessCode(aResult)) {
+      /* XXX: Error handling */
+      return;
+    }
+    var alertsService = Cc["@mozilla.org/alerts-service;1"].getService(Ci.nsIAlertsService); 
+    alertsService.showAlertNotification("",  "Library Exported to XHTML", "Click here to display the file in the new tab", true, "showxhtml", alertListener, "");  
+  });  
 }
 
 LibraryPrivate.finishStartup = function() {
@@ -317,6 +325,22 @@ function removeFile(filePath) {
     }
   }
 }
+
+var alertListener = {
+  observe: function(subject, topic, data) {
+    if (topic != "alertclickcallback") { return; }
+    if (data == "showxhtml") {
+      /* Open a new tab to display the file */
+      var outputFile = LibraryPrivate.defaultDir.clone();
+      outputFile.append("Library.xhtml");
+      var outputFileURI = Services.io.newFileURI(outputFile);
+      var wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
+      var mainWindow = wm.getMostRecentWindow("navigator:browser");
+      mainWindow.gBrowser.selectedTab = mainWindow.gBrowser.addTab(outputFileURI.spec);
+      
+    }
+  }
+};
 
 /* Startup: check the folder, add database if needed */
 Library.startup = function() {
