@@ -250,8 +250,9 @@ LibraryPrivate.parseAndExportItemsToXHTML = function(items) {
       /* XXX: Error handling */
       return;
     }
+    var libraryStrings = new stringsHelperGenerator("chrome://ccmediacollector/locale/library.properties");
     var alertsService = Cc["@mozilla.org/alerts-service;1"].getService(Ci.nsIAlertsService); 
-    alertsService.showAlertNotification("",  "Library Exported to XHTML", "Click here to display the file in the new tab", true, "showxhtml", alertListener, "");  
+    alertsService.showAlertNotification("", libraryStrings.getString("alertXHTMLCompleteTitle"), libraryStrings.getString("alertXHTMLCompleteText"), true, "showxhtml", alertListener, "");  
   });  
 }
 
@@ -342,6 +343,20 @@ var alertListener = {
   }
 };
 
+/* Generator for strings bundle helper */
+var stringsHelperGenerator = function(url){
+  this._bundle = Services.strings.createBundle(url);
+}
+stringsHelperGenerator.prototype = {
+  getString: function(str) {
+    if (this._bundle === null) return '';
+    return this._bundle.GetStringFromName(str);
+  },
+  getFormattedString: function (key, arr) {
+    if (toString.call(arr) === "[object Array]") {return '';} // Technology from jQuery
+    return this._bundle.formatStringFromName(key, arr, arr.length);
+  }
+};
 /* Startup: check the folder, add database if needed */
 Library.startup = function() {
   if (!LibraryPrivate.setDefaultDir()) {
