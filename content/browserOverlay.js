@@ -12,6 +12,7 @@ ccMediaCollector.onLoad = function() {
   appcontent.addEventListener("DOMContentLoaded", ccMediaCollector.onPageLoad, true);
   gBrowser.addProgressListener(this.progressListener, Ci.nsIWebProgress.NOTIFY_LOCATION);  
   Components.utils.import("resource://ccmediacollector/Library.jsm", ccMediaCollector);
+  Components.utils.import("resource://ccmediacollector/ContentSniffer.jsm", ccMediaCollector);
   this.Library.addListener(this.libraryListener);
   
 };
@@ -89,13 +90,13 @@ ccMediaCollector.onPageLoad = function(aEvent) {
   var browser =  gBrowser.getBrowserForDocument(doc);
   if (win.frameElement || !browser) { return; }
   //gBrowser.selectedBrowser
-  Components.utils.import("resource://ccmediacollector/ContentSniffer.jsm");
-  var info = ContentSniffer.readFromPage(doc);
+  var info = ccMediaCollector.ContentSniffer.readFromPage(doc);
   if(info) {
     browser.ccmc = info;
     /* Ensure the button is only changed when the document is selected */
     if (gBrowser.selectedBrowser == browser) {
       document.getElementById("ccmc-add-button").hidden = false;
+      ccMediaCollector.Library.checkExistence(info.url, ccMediaCollector, "updateExistence");
     }
   }
 };
