@@ -7,9 +7,9 @@
       onload="collection.onLoad();" onunload="collection.onUnload();"
       title="&page.title;">
   <script type="application/x-javascript" src="chrome://ccmediacollector/content/collection/collection.js" />
-  <!--<stringbundleset id="stringbundleset">
-    <stringbundle id="nicomonkey-strings" src="chrome://ccmediacollector/locale/collection.properties"/>
-  </stringbundleset>-->
+  <stringbundleset id="stringbundleset">
+    <stringbundle id="ccmc-strings" src="chrome://ccmediacollector/locale/library.properties"/>
+  </stringbundleset>
   <!-- Popup set for library item -->
   <popupset id="libraryItemPopupset">
     <menupopup id="libraryItemPopup" onpopupshowing="return collection.generateContextMenu(event);" onpopuphiding="">
@@ -34,23 +34,23 @@
       <textbox type="search" emptytext="&search.emptytext;" oncommand="collection.search();" id="searchText" size="30"/>
     </hbox>
     <hbox align="center">
-      <label value="Type:" />
-      <button label="Images, Audios, Videos" id="typeMenuButton" type="menu">
+      <label value="&type.label;" />
+      <button label="" id="typeMenuButton" type="menu">
         <menupopup>
           <menuitem id="typeMenuImage" type="checkbox" label="&typeMenuImage.label;" accesskey="&typeMenuImage.accesskey;" checked="true" oncommand="collection.search();"/>
           <menuitem id="typeMenuAudio" type="checkbox" label="&typeMenuAudio.label;" accesskey="&typeMenuAudio.accesskey;" checked="true" oncommand="collection.search();"/>
           <menuitem id="typeMenuVideo" type="checkbox" label="&typeMenuVideo.label;" accesskey="&typeMenuVideo.accesskey;" checked="true" oncommand="collection.search();"/>
         </menupopup>
       </button>
-      <label value="Permission:" />
-      <button id="permissionMenuButton" label="Not Filtered" type="menu">
+      <label value="&permission.label;" />
+      <button id="permissionMenuButton" label="" type="menu">
         <menupopup>
-          <menuitem disabled="true" label="Commercial uses" />
+          <menuitem disabled="true" label="&permissionMenuComTitle.label;" />
           <menuitem id="permissionMenuComNotFiltered" type="radio" name="permissionMenuCom" label="&notFiltered.label;" accesskey="&notFiltered.accesskey;" checked="true" oncommand="collection.search();"/>
           <menuitem id="permissionMenuComAllowed" type="radio" name="permissionMenuCom" label="&permissionMenuComAllowed.label;" accesskey="&permissionMenuComAllowed.accesskey;" oncommand="collection.search();"/>
           <menuitem id="permissionMenuComDenied" type="radio" name="permissionMenuCom" label="&permissionMenuComDenied.label;" accesskey="&permissionMenuComDenied.accesskey;" oncommand="collection.search();"/>
           <menuseparator />
-          <menuitem disabled="true" label="Modifications" />
+          <menuitem disabled="true" label="&permissionMenuModTitle.label;" />
           <menuitem id="permissionMenuModNotFiltered" type="radio" name="permissionMenuMod" label="&notFiltered.label;" accesskey="&notFiltered.accesskey;" checked="true" oncommand="collection.search();"/>
           <menuitem id="permissionMenuModAllowed" type="radio" name="permissionMenuMod" label="&permissionMenuModAllowed.label;" accesskey="&permissionMenuModAllowed.accesskey;" oncommand="collection.search();"/>
           <menuitem id="permissionMenuModShareAlike" type="radio" name="permissionMenuMod" label="&permissionMenuModShareAlike.label;" accesskey="&permissionMenuModShareAlike.accesskey;" oncommand="collection.search();"/>

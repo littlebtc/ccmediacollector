@@ -1,6 +1,6 @@
 <!ENTITY collectionMenu.label "Media Collection...">
 <!ENTITY collectionMenu.accesskey "M">
 <!ENTITY addButton.tooltip "Add into CC Media Collector Collection">
-<!ENTITY collect.label "Add This Media">
+<!ENTITY collect.label "Add Into Collection">
 <!ENTITY collected.label "Added in Collection">
-<!ENTITY showCollection.tooltipText "Show All Collections">
+<!ENTITY showCollection.tooltipText "Show All Media Collections">

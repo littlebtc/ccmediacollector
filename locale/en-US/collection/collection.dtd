@@ -1,4 +1,5 @@
 <!ENTITY page.title "Media Collection">
+<!ENTITY type.label "Type:">
 <!ENTITY typeMenuImage.label "Images">
 <!ENTITY typeMenuImage.accesskey "I">
 <!ENTITY typeMenuAudio.label "Audios">
@@ -8,17 +9,20 @@
 <!ENTITY notFiltered.label "Not Filtered">
 <!ENTITY notFiltered.accesskey "N">
 <!ENTITY search.emptytext "Search">
+<!ENTITY permission.label "Permission:">
+<!ENTITY permissionMenuComTitle.label "Commercial Uses">
 <!ENTITY permissionMenuComAllowed.label "Commercial Uses Allowed">
 <!ENTITY permissionMenuComAllowed.accesskey "A">
 <!ENTITY permissionMenuComDenied.label "Commercial Uses Denied">
 <!ENTITY permissionMenuComDenied.accesskey "D">
+<!ENTITY permissionMenuModTitle.label "Modification">
 <!ENTITY permissionMenuModAllowed.label "Modifications Allowed, Need Not Share Alike">
 <!ENTITY permissionMenuModAllowed.accesskey "A">
 <!ENTITY permissionMenuModShareAlike.label "Modifications Allowed, Must Share Alike">
 <!ENTITY permissionMenuModShareAlike.accesskey "S">
 <!ENTITY permissionMenuModDenied.label "Modifications Denied">
 <!ENTITY permissionMenuModDenied.accesskey "D">
-<!ENTITY export.label "Export Collection to XHTML">
+<!ENTITY export.label "Export Collection List to XHTML">
 <!ENTITY popup.cancel.label "Cancel Download">
 <!ENTITY popup.cancel.accesskey "C">
 <!ENTITY popup.fetch.label "Fetch Original File">

@@ -56,6 +56,8 @@ collection.showItems = function(argsArray) {
     list.appendChild(item);
     this.updateItem(item, argsArray[i]);
   }
+  /* XXX: This is only used to update label on filter buttons. */
+  collection.search();
 };
 collection.dbError = function() {
   alert("Collection DB Error!");
@@ -143,13 +145,13 @@ collection.search = function() {
 
   var permissionStringComponents = [];
   var permissionComLabel = document.getElementById("permissionMenuCom" + permissionForCom).label;
-  if (permissionComLabel != "Not Filtered") permissionStringComponents.push(permissionComLabel);
+  if (permissionForCom != "NotFiltered") permissionStringComponents.push(permissionComLabel);
   var permissionModLabel = document.getElementById("permissionMenuMod" + permissionForMod).label;
-  if (permissionModLabel != "Not Filtered") permissionStringComponents.push(permissionModLabel);
+  if (permissionForMod != "NotFiltered") permissionStringComponents.push(permissionModLabel);
   if (permissionStringComponents.length > 0) {
     document.getElementById("permissionMenuButton").label = permissionStringComponents.join(", ");
   } else {
-    document.getElementById("permissionMenuButton").label = "Not Filtered";
+    document.getElementById("permissionMenuButton").label = document.getElementById("permissionMenuComNotFiltered").label;
   }
 };
 
@@ -195,7 +197,8 @@ collection.removeItem = function() {
   var id = parseInt(item.getAttribute("ccmcid"), 10);
   if (!id) { return; }
   /* Confirm dialog */
-  var result = this.Services.prompt.confirm(null, "Media Collection", "Are you sure to remove this item from collection?");
+  var strings = document.getElementById("ccmc-strings");
+  var result = this.Services.prompt.confirm(null, strings.getString("alertRemoveTitle"), strings.getString("alertRemoveText"));
   if (!result) { return; }
 
   this.Library.remove(id);
