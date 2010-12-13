@@ -3,6 +3,14 @@
   width: 300px;
 }
 
+#ccmc-info-collect-button {
+  -moz-binding: url(chrome://ccmediacollector/content/collectButton.xml#ccmc-collect);
+}
+
+#ccmc-info-collect-button[collected="true"] {
+  -moz-binding: url(chrome://ccmediacollector/content/collectButton.xml#ccmc-collected);
+}
+
 #ccmc-info-container > vbox {
   padding: 5px;
 }

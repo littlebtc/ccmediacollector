@@ -23,7 +23,7 @@
       <menuitem label="&popup.go.label;" accesskey="&popup.go.accesskey;" id="libraryItemPopupGo"
         oncommand= "collection.popup.go(document.getElementById('collectionList').selectedItem);"/>
       <menuitem label="&popup.copy.label;" accesskey="&popup.copy.accesskey;" id="libraryItemPopupCopy"
-        oncommand= "collection.popup.copyVideoUrl(document.getElementById('collectionList').selectedItem);"/>
+        oncommand= "collection.popup.copy(document.getElementById('collectionList').selectedItem);"/>
       <menuseparator id="libraryItemPopupSeparator2" />
       <menuitem label="&popup.remove.label;" accesskey="&popup.remove.accesskey;" id="libraryItemPopupRemove"
         oncommand= "collection.removeItem();"/>

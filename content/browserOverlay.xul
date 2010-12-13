@@ -3,8 +3,11 @@
 <!DOCTYPE overlay SYSTEM "chrome://ccmediacollector/locale/browserOverlay.dtd">
 <overlay id="ccmediacollector-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   <script type="application/x-javascript" src="chrome://ccmediacollector/content/browserOverlay.js"/>
+  <commandset id="mainCommandSet">
+    <command id="ccmc_collect" oncommand="ccMediaCollector.collectCurrentPage();"/>
+  </commandset>
   <menupopup id="menu_ToolsPopup">
-      <menuitem id="ccmc" label="Media Collection..." insertbefore="javascriptConsole" oncommand="gBrowser.selectedTab = gBrowser.addTab('about:collection', gBrowser.currentURI);"/>
+      <menuitem id="ccmc" label="&collectionMenu.label;" accesskey="&collectionMenu.accesskey;" insertbefore="javascriptConsole" oncommand="gBrowser.selectedTab = gBrowser.addTab('about:collection', gBrowser.currentURI);" />
   </menupopup>
   
   <hbox id="urlbar-icons">
@@ -21,7 +24,7 @@
           <label id="ccmc-info-title" class="header" />
           <label id="ccmc-info-attribution-name" class="text-link" />
           <hbox><image id="ccmc-info-license" /></hbox>
-          <button id="ccmc-info-collect-button" label="Collect!" oncommand="ccMediaCollector.collectCurrentPage();" />
+          <box id="ccmc-info-collect-button"/>
           <progressmeter id="ccmc-info-fetch-progress" hidden="true" mode="undetermined"/>
         </vbox>
       </hbox>

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE bindings [
+  <!ENTITY % collectButtonDTD SYSTEM "chrome://ccmediacollector/locale/browserOverlay.dtd">
+  %collectButtonDTD;
+]>
+<bindings xmlns="http://www.mozilla.org/xbl"
+          xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+          xmlns:xbl="http://www.mozilla.org/xbl">
+  <binding id="ccmc-collect" extends="chrome://global/content/bindings/general.xml#basecontrol">
+    <content>
+      <xul:hbox flex="1">
+        <xul:button label="&collect.label;" command="ccmc_collect" flex="1" />
+      </xul:hbox>
+    </content>
+  </binding>
+  <binding id="ccmc-collected" extends="chrome://global/content/bindings/general.xml#basecontrol">
+    <content>
+      <xul:hbox align="center" flex="1">
+        <xul:button label="&collected.label;" disabled="true" flex="1" />
+        <xul:image src="chrome://ccmediacollector/skin/book_go.png" tooltiptext="&showCollection.tooltipText;" onclick="gBrowser.selectedTab = gBrowser.addTab('about:collection', gBrowser.currentURI);" />
+      </xul:hbox>
+    </content>
+  </binding>
+</bindings>

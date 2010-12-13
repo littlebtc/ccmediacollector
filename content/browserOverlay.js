@@ -132,11 +132,11 @@ ccMediaCollector.updateExistence = function(url, id) {
   if(info.url == url) {
     if (id) {
       document.getElementById("ccmc-info-title").setAttribute("ccmc-id", id);
-      document.getElementById("ccmc-info-collect-button").label = "Collected";
-      document.getElementById("ccmc-info-collect-button").disabled = true;
+      document.getElementById("ccmc-info-collect-button").setAttribute("collected", "true");
+      document.getElementById("ccmc-add-button").setAttribute("src", "chrome://ccmediacollector/skin/note.png");
     } else {
-      document.getElementById("ccmc-info-collect-button").label = "Collect!";
-      document.getElementById("ccmc-info-collect-button").disabled = false;
+      document.getElementById("ccmc-info-collect-button").removeAttribute("collected");
+      document.getElementById("ccmc-add-button").setAttribute("src", "chrome://ccmediacollector/skin/note_add.png");
     }
   }
 };
