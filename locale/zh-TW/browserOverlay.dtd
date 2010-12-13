@@ -1,0 +1,6 @@
+<!ENTITY collectionMenu.label "媒體收藏...">
+<!ENTITY collectionMenu.accesskey "M">
+<!ENTITY addButton.tooltip "新增到 CC Media Collector 的收藏">
+<!ENTITY collect.label "加入到收藏">
+<!ENTITY collected.label "已加入到收藏">
+<!ENTITY showCollection.tooltipText "顯示所有媒體收藏">

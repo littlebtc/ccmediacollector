@@ -1,5 +1,6 @@
 content	ccmediacollector		content/
 locale	ccmediacollector		en-US	locale/en-US/
+locale	ccmediacollector		zh-TW locale/zh-TW/
 skin	ccmediacollector		classic/1.0	skin/
 resource ccmediacollector modules/
 overlay	chrome://browser/content/browser.xul	chrome://ccmediacollector/content/browserOverlay.xul
