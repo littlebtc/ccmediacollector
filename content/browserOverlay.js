@@ -4,23 +4,30 @@
 var ccMediaCollector = {};
 /* Fire when browser.js is loading. */
 ccMediaCollector.onLoad = function() {
+  window.removeEventListener("load", ccMediaCollector.onLoad, false);
   /* Apply in-content UI whitelist to about:collection on Firefox 4. http://bugzil.la/571970 */
   if (XULBrowserWindow.inContentWhitelist) {
     XULBrowserWindow.inContentWhitelist.push("about:collection");
   }
   var appcontent = document.getElementById("appcontent");
-  appcontent.addEventListener("DOMContentLoaded", ccMediaCollector.onPageLoad, true);
-  gBrowser.addProgressListener(this.progressListener, Ci.nsIWebProgress.NOTIFY_LOCATION);  
+  if (appcontent) {
+    appcontent.addEventListener("DOMContentLoaded", ccMediaCollector.onPageLoad, false);
+  }
+  gBrowser.addProgressListener(ccMediaCollector.progressListener, Ci.nsIWebProgress.NOTIFY_LOCATION);
   Components.utils.import("resource://ccmediacollector/Library.jsm", ccMediaCollector);
   Components.utils.import("resource://ccmediacollector/ContentSniffer.jsm", ccMediaCollector);
-  this.Library.addListener(this.libraryListener);
+  ccMediaCollector.ibrary.addListener(ccMediaCollector.libraryListener);
   
 };
 /* Fire when browser.js is unloading. */
 ccMediaCollector.onUnload = function() {
-  gBrowser.removeProgressListener(this.progressListener);  
-  this.Library.removeListener(this.libraryListener);
-  
+  window.removeEventListener("unload", ccMediaCollector.onUnload, false);
+  var appcontent = document.getElementById("appcontent");
+  if (appcontent) {
+    appcontent.removeEventListener("DOMContentLoaded", ccMediaCollector.onPageLoad, false);
+  }
+  gBrowser.removeProgressListener(ccMediaCollector.progressListener);
+  ccMediaCollector.Library.removeListener(ccMediaCollector.libraryListener);
 };
 /* Listenes to collection item modification and fetch progress. */
 ccMediaCollector.libraryListener = {
@@ -165,6 +172,6 @@ ccMediaCollector.collectCurrentPage = function() {
   this.Library.checkExistence(info.url, ccMediaCollector, "updateExistence");
 };
 
-window.addEventListener("load", function() { ccMediaCollector.onLoad(); } , false);
-window.addEventListener("unload", function() { ccMediaCollector.onUnload(); } , false);
+window.addEventListener("load", ccMediaCollector.onLoad, false);
+window.addEventListener("unload", ccMediaCollector.onUnload, false);
 
