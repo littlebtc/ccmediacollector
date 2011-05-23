@@ -16,7 +16,7 @@ ccMediaCollector.onLoad = function() {
   gBrowser.addProgressListener(ccMediaCollector.progressListener, Ci.nsIWebProgress.NOTIFY_LOCATION);
   Components.utils.import("resource://ccmediacollector/Library.jsm", ccMediaCollector);
   Components.utils.import("resource://ccmediacollector/ContentSniffer.jsm", ccMediaCollector);
-  ccMediaCollector.ibrary.addListener(ccMediaCollector.libraryListener);
+  ccMediaCollector.Library.addListener(ccMediaCollector.libraryListener);
   
 };
 /* Fire when browser.js is unloading. */
