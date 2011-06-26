@@ -124,6 +124,84 @@ LibraryPrivate.handleDownloadEvent = function(id, type, value) {
     break;
   }
 };
+/* Parse the items to meanful ATOM using E4X */
+LibraryPrivate.parseAndExportItemsToAtom = function(items) {
+  /* nsILocalFile Constructor helper */
+  var _fileInstance = Components.Constructor("@mozilla.org/file/local;1", "nsILocalFile", "initWithPath");
+  /* Make a nsIURL to compare relative path */
+  var defaultDirURI = Services.io.newFileURI(this.defaultDir).QueryInterface(Ci.nsIURL);
+
+  /* Prepare the output XHTML file instance and generate URI for it */
+  var outputFile = LibraryPrivate.defaultDir.clone();
+  outputFile.append("Library.atom");
+  var outputURISpec = Services.io.newFileURI(outputFile).spec;
+
+  /* Get the latest update time.
+   * XXX: Don't assume the latest id as last collected item? */
+  var updatedTime = dateToW3CDTF((items.length > 0)? new Date(items[0].collected_at) : new Date());
+
+  var atom = <feed xmlns="http://www.w3.org/2005/Atom">
+    <title>CC Media Collector Feed</title>
+    <link rel="self" href={outputURISpec} />
+    <updated>{updatedTime}</updated>
+    <id>{outputURISpec}</id>
+    {function() {
+      var resultXML = <></>;
+      for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        /* Fill the dc:type and the content field with Atom XML. */
+        /* XXX: Use Media RSS Thumbail? */
+        var fileInstance = new _fileInstance(item.file);
+        var fileUrl = defaultDirURI.getRelativeSpec(Services.io.newFileURI(fileInstance));
+        var contentXML = <></>;
+        var dcType = "";
+        var dcTypeName = "";
+        var iso8601Time = dateToW3CDTF(new Date((item.collected_at)?item.collected_at:0));
+        switch (item.type) {
+          case "dcmitype:Sound":
+          case "dcmitype:StillImage":
+          case "dcmitype:MovingImage":
+            dcType = "http://purl.org/dc/dcmitype/MovingImage";
+            dcTypeName = "Video";
+            contentXML = <link rel="enclosure" href={fileUrl} />;
+            break;
+        }
+        resultXML += <entry>
+          <id>{item.url}</id>
+          <title>{item.title}</title>
+          <author>
+            <name>{item.attribution_name}</name>
+            <uri>{item.attribution_url}</uri>
+          </author>
+          <link rel="license" href={item.license_url} type="text/html" />
+          <link rel="alternate" href={item.url} type="text/html" />
+          <updated>{iso8601Time}</updated>
+          {contentXML}
+        </entry>;
+      }
+      return resultXML;
+    }()}
+  </feed>;
+  var foStream = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
+  foStream.init(outputFile, 0x02 | 0x08 | 0x20, 0755, 0);
+  /* Convert string to input stream, then use asyncCopy
+     https://developer.mozilla.org/en/writing_textual_data */
+  var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);
+  converter.charset = "UTF-8";
+  var iStream = converter.convertToInputStream("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + atom.toXMLString());
+
+  Components.utils.import("resource://gre/modules/NetUtil.jsm");
+  NetUtil.asyncCopy(iStream, foStream, function(aResult) {
+    /* Show the notification after completed */
+    if (!Components.isSuccessCode(aResult)) {
+      /* XXX: Error handling */
+      return;
+    }
+    var libraryStrings = new stringsHelperGenerator("chrome://ccmediacollector/locale/library.properties");
+    var alertsService = Cc["@mozilla.org/alerts-service;1"].getService(Ci.nsIAlertsService);
+    alertsService.showAlertNotification("", libraryStrings.getString("alertXHTMLCompleteTitle"), libraryStrings.getString("alertXHTMLCompleteText"), true, "showxhtml", alertListener, "");
+  });
+}
 /* Parse the items to CCREL meanful XHTML using E4X */
 LibraryPrivate.parseAndExportItemsToXHTML = function(items) {
   /* nsILocalFile Constructor helper */
@@ -402,8 +480,9 @@ Library.checkExistence = function(url, thisObj, successCallback) {
 /* Add items into library */
 Library.add = function(url, info) {
 
-  var statement = LibraryPrivate.dbConnection.createStatement("INSERT INTO `library` (`type`, `url`, `title`, `original_title`, `attribution_name`, `attribution_url`, `source`, `license_url`, `license_nc`, `license_sa`, `license_nd`, `more_permission_url`, `original_url`, `thumbnail_url`) VALUES (:type, :url, :original_title, :title, :attribution_name, :attribution_url, :source, :license_url, :license_nc, :license_sa, :license_nd, :more_permission_url, :original_url, :thumbnail_url)");
+  var statement = LibraryPrivate.dbConnection.createStatement("INSERT INTO `library` (`type`, `url`, `title`, `original_title`, `attribution_name`, `attribution_url`, `source`, `license_url`, `license_nc`, `license_sa`, `license_nd`, `more_permission_url`, `original_url`, `thumbnail_url`, `collected_at`) VALUES (:type, :url, :original_title, :title, :attribution_name, :attribution_url, :source, :license_url, :license_nc, :license_sa, :license_nd, :more_permission_url, :original_url, :thumbnail_url, :collected_at)");
   statement.params["url"] = url;
+  statement.params["collected_at"] = new Date().getTime();
   /* Fill license information if needed */
   if (info.license_url && info.license_url.search(/creativecommons/) != -1) {
     statement.params["license_nc"] = (info.license_url.search(/\-nc/) != -1);
@@ -489,7 +568,11 @@ Library.update = function(id, params) {
 
 Library.exportToXHTML = function() {
   /* First get all items in the library. */
-  this.getAllAsc(LibraryPrivate, "parseAndExportItemsToXHTML", "dbFail");  
+  this.getAllAsc(LibraryPrivate, "parseAndExportItemsToXHTML", "dbFail");
+};
+Library.exportToAtom = function() {
+  /* First get all items in the library. */
+  this.getAll(LibraryPrivate, "parseAndExportItemsToAtom", "dbFail");
 };
 
 /* Make other instances listens to the changes to the library. */
@@ -510,4 +593,26 @@ function triggerListeners(eventName, id, content) {
   { 
     if ((typeof libraryListeners[i][eventName]) == 'function') { libraryListeners[i][eventName].call(libraryListeners[i], id, content); }
   }
+}
+
+/* Convert Date object to W3C-DTF format with UTC timezone, to generate valid atom.
+ * Modified from js/src/xpconnect/loader/ISO8601DateUtils.jsm
+ */
+function dateToW3CDTF(myDate) {
+    // YYYY-MM-DDThh:mm:ssZ
+  var result = zeropad(myDate.getUTCFullYear (), 4) + "-" +
+               zeropad(myDate.getUTCMonth () + 1, 2) + "-" +
+               zeropad(myDate.getUTCDate (), 2) + 'T' +
+               zeropad(myDate.getUTCHours (), 2) + ':' +
+               zeropad(myDate.getUTCMinutes (), 2) + ':' +
+               zeropad(myDate.getUTCSeconds (), 2) + 'Z';
+
+  return result;
+}
+function zeropad (s, l) {
+  s = s.toString(); // force it to a string
+  while (s.length < l) {
+    s = '0' + s;
+  }
+  return s;
 }
