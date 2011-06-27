@@ -161,9 +161,7 @@ LibraryPrivate.parseAndExportItemsToAtom = function(items) {
           case "dcmitype:Sound":
           case "dcmitype:StillImage":
           case "dcmitype:MovingImage":
-            dcType = "http://purl.org/dc/dcmitype/MovingImage";
-            dcTypeName = "Video";
-            contentXML = <link rel="enclosure" href={fileUrl} />;
+            //contentXML = <link rel="enclosure" href={fileUrl} />;
             break;
         }
         resultXML += <entry>
@@ -182,25 +180,16 @@ LibraryPrivate.parseAndExportItemsToAtom = function(items) {
       return resultXML;
     }()}
   </feed>;
-  var foStream = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
-  foStream.init(outputFile, 0x02 | 0x08 | 0x20, 0755, 0);
-  /* Convert string to input stream, then use asyncCopy
-     https://developer.mozilla.org/en/writing_textual_data */
-  var converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);
-  converter.charset = "UTF-8";
-  var iStream = converter.convertToInputStream("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + atom.toXMLString());
+  var callback = { 
+    'ok': function() { Components.utils.reportError("ok"); },
+    'err': function() { Components.utils.reportError("err"); }
+  }
+  Components.utils.import("resource://ccmediacollector/Network.jsm");
+  Network.uploadAsync("http://ccma.creativecommons.tw/submit/",
+                      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + atom.toXMLString(),
+                      "library" + new Date().getTime() + ".xml",
+                      callback, 'ok', 'err')
 
-  Components.utils.import("resource://gre/modules/NetUtil.jsm");
-  NetUtil.asyncCopy(iStream, foStream, function(aResult) {
-    /* Show the notification after completed */
-    if (!Components.isSuccessCode(aResult)) {
-      /* XXX: Error handling */
-      return;
-    }
-    var libraryStrings = new stringsHelperGenerator("chrome://ccmediacollector/locale/library.properties");
-    var alertsService = Cc["@mozilla.org/alerts-service;1"].getService(Ci.nsIAlertsService);
-    alertsService.showAlertNotification("", libraryStrings.getString("alertXHTMLCompleteTitle"), libraryStrings.getString("alertXHTMLCompleteText"), true, "showxhtml", alertListener, "");
-  });
 }
 /* Parse the items to CCREL meanful XHTML using E4X */
 LibraryPrivate.parseAndExportItemsToXHTML = function(items) {
